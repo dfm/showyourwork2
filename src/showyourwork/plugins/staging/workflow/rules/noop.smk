@@ -1,4 +1,5 @@
-from snakemake_staging import stages, utils
+from showyourwork import utils
+from showyourwork.plugins.staging import stages
 
 for name, stage in stages.STAGES.items():
     if not isinstance(stage, stages.NoOpStage):
@@ -40,7 +41,7 @@ for name, stage in stages.STAGES.items():
         if stage.restore:
             rule:
                 name:
-                    utils.rule_name("noop", name, "copy", path=filename)
+                    utils.rule_name("noop", name, "copy", document=filename)
                 message:
                     f"Copying file '{filename}' from stage '{name}'"
                 input:
@@ -53,7 +54,7 @@ for name, stage in stages.STAGES.items():
         else:
             rule:
                 name:
-                    utils.rule_name("noop", name, "copy", path=filename)
+                    utils.rule_name("noop", name, "copy", document=filename)
                 message:
                     f"Copying file '{filename}' to stage '{name}'"
                 input:

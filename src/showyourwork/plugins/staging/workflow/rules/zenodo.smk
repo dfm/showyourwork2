@@ -1,4 +1,5 @@
-from snakemake_staging import stages, utils, zenodo
+from showyourwork import utils
+from showyourwork.plugins.staging import stages, zenodo
 
 for name, stage in stages.STAGES.items():
     if not isinstance(stage, zenodo.ZenodoStage):
@@ -10,7 +11,7 @@ for name, stage in stages.STAGES.items():
         for file in stage.files.values():
             rule:
                 name:
-                    utils.rule_name("zenodo", name, "download", path=file)
+                    utils.rule_name("zenodo", name, "download", document=file)
                 message:
                     f"Restoring file '{file}' for stage '{name}'"
                 input:
@@ -34,7 +35,7 @@ for name, stage in stages.STAGES.items():
         for file in stage.files.values():
             rule:
                 name:
-                    utils.rule_name("zenodo", name, "upload", path=file)
+                    utils.rule_name("zenodo", name, "upload", document=file)
                 message:
                     f"Uploading file '{file}' for stage '{name}'"
                 input:

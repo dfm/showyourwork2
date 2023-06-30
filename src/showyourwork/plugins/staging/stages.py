@@ -62,4 +62,6 @@ class NoOpStage(Stage):
         return self.working_directory / self.name
 
     def snakefile(self) -> Path:
-        return package_data("workflow", "rules", "noop.smk")
+        return package_data(
+            "showyourwork.plugins.staging", "workflow", "rules", "noop.smk"
+        )

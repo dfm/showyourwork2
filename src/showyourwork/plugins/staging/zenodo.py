@@ -57,7 +57,9 @@ class ZenodoStage(Stage):
         return self.working_directory / f"{self.name}.zenodo" / f"{ident}.upload.json"
 
     def snakefile(self) -> Path:
-        return package_data("workflow", "rules", "zenodo.smk")
+        return package_data(
+            "showyourwork.plugins.staging", "workflow", "rules", "zenodo.smk"
+        )
 
     @cached_property
     def token(self) -> Optional[str]:
