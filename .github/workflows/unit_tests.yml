@@ -46,14 +46,6 @@ jobs:
             python=${{ matrix.python-version }}
             mamba
 
-      - name: Cache test conda environments
-        uses: actions/cache@v3
-        with:
-          path: .test/conda
-          key: ${{ runner.os }}-${{ matrix.python-version }}-conda-${{ hashFiles('**/environment.yml') }}-${{ hashFiles('**/envs/*.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.python-version }}-conda-
-
       - name: Install showyourwork
         run: |
           python -m pip install -U pip
