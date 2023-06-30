@@ -39,12 +39,12 @@ jobs:
           submodules: recursive
 
       - name: Set up Mamba
-        uses: conda-incubator/setup-miniconda@v2
+        uses: mamba-org/setup-micromamba@v1
         with:
-          channels: conda-forge,defaults
-          channel-priority: strict
-          python-version: ${{ matrix.python-version }}
-          mamba-version: "*"
+          environment-name: test-env
+          create-args: >-
+            python=${{ matrix.python-version }}
+            mamba
 
       - name: Cache test conda environments
         uses: actions/cache@v3
