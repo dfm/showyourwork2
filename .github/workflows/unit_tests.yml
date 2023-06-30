@@ -41,10 +41,10 @@ jobs:
       - name: Set up Mamba
         uses: conda-incubator/setup-miniconda@v2
         with:
-          environment-file: .github/resources/env.yml
-
-      - name: Set up Python
-        run: mamba install python=${{ matrix.python-version }}
+          channels: conda-forge
+          channel-priority: strict
+          python-version: ${{ matrix.python-version }}
+          mamba-version: "*"
 
       - name: Cache test conda environments
         uses: actions/cache@v3
@@ -55,10 +55,11 @@ jobs:
             ${{ runner.os }}-${{ matrix.python-version }}-conda-
 
       - name: Install showyourwork
+        shell: bash -el {0}
         run: |
           python -m pip install -U pip
           python -m pip install -e ".[test]"
 
       - name: Run tests
-        run: |
-          python -m pytest -v tests
+        shell: bash -el {0}
+        run: python -m pytest -v tests
