@@ -1,4 +1,4 @@
-from showyourwork.testing import run_snakemake
+from showyourwork2.testing import run_snakemake
 
 
 def test_config_args() -> None:

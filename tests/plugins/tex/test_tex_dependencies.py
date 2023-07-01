@@ -1,4 +1,4 @@
-from showyourwork.testing import run_showyourwork
+from showyourwork2.testing import run_showyourwork
 
 
 def test_tex_dependencies() -> None:

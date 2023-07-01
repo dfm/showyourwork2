@@ -2,7 +2,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import pytest
-from showyourwork.testing import run_snakemake
+from showyourwork2.testing import run_snakemake
 
 
 @pytest.mark.parametrize("prefix", ["", "syw__", "sywplug_"])
@@ -12,7 +12,7 @@ def test_rule_order(prefix: str) -> None:
         with open(root / "Snakefile", "w") as f:
             f.write(
                 """
-from showyourwork.rule_order import fix_rule_order
+from showyourwork2.rule_order import fix_rule_order
 
 rule a:
     output: "a.txt"

@@ -1,0 +1,5 @@
+from showyourwork2.paths import package_data
+
+include: package_data("showyourwork2.plugins.tex", "workflow", "rules", "common.smk")
+include: package_data("showyourwork2.plugins.tex", "workflow", "rules", "dependencies.smk")
+include: package_data("showyourwork2.plugins.tex", "workflow", "rules", "build.smk")

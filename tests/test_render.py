@@ -1,7 +1,7 @@
 import platform
 
 import pytest
-from showyourwork.testing import run_showyourwork
+from showyourwork2.testing import run_showyourwork
 
 
 @pytest.mark.skipif(

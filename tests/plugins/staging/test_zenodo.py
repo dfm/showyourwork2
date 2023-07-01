@@ -2,8 +2,8 @@ import os
 from typing import Generator
 
 import pytest
-from showyourwork.plugins.staging.zenodo_mock import ZenodoMock
-from showyourwork.testing import run_snakemake
+from showyourwork2.plugins.staging.zenodo_mock import ZenodoMock
+from showyourwork2.testing import run_snakemake
 
 
 @pytest.fixture(scope="session")

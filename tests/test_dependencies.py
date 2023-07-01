@@ -2,8 +2,8 @@ import json
 from pathlib import Path
 from typing import List
 
-from showyourwork.dependencies import simplify_dependency_tree
-from showyourwork.testing import run_showyourwork
+from showyourwork2.dependencies import simplify_dependency_tree
+from showyourwork2.testing import run_showyourwork
 
 
 def test_dependency_tree() -> None:
