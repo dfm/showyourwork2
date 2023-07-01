@@ -7,7 +7,11 @@ from showyourwork.plugins.staging.stages import Stage as Stage
 from showyourwork.plugins.staging.zenodo import ZenodoStage as ZenodoStage
 
 
-def snakefiles() -> List[Path]:
+def snakefile() -> Path:
     from showyourwork.paths import package_data
 
-    return [package_data("showyourwork.plugins.staging", "workflow", "Snakefile")]
+    return package_data("showyourwork.plugins.staging", "workflow", "Snakefile")
+
+
+def snakefiles() -> List[Path]:
+    return [snakefile()]

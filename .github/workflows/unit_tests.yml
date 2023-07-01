@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - main
-      - staging*
+    tags:
+      - "*"
   pull_request:
   workflow_dispatch:
 
@@ -12,7 +13,7 @@ jobs:
   tests:
     defaults:
       run:
-        shell: bash -l {0}
+        shell: bash -el {0}
 
     strategy:
       fail-fast: false
@@ -39,20 +40,12 @@ jobs:
           submodules: recursive
 
       - name: Set up Mamba
-        uses: conda-incubator/setup-miniconda@v2
+        uses: mamba-org/setup-micromamba@v1
         with:
-          environment-file: .github/resources/env.yml
-
-      - name: Set up Python
-        run: mamba install python=${{ matrix.python-version }}
-
-      - name: Cache test conda environments
-        uses: actions/cache@v3
-        with:
-          path: .test/conda
-          key: ${{ runner.os }}-${{ matrix.python-version }}-conda-${{ hashFiles('**/environment.yml') }}-${{ hashFiles('**/envs/*.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.python-version }}-conda-
+          environment-name: test-env
+          create-args: >-
+            python=${{ matrix.python-version }}
+            mamba
 
       - name: Install showyourwork
         run: |
@@ -60,5 +53,39 @@ jobs:
           python -m pip install -e ".[test]"
 
       - name: Run tests
+        run: python -m pytest -v tests
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v4
+        name: Install Python
+        with:
+          python-version: "3.10"
+      - name: Build sdist and wheel
         run: |
-          python -m pytest -v tests
+          python -m pip install -U pip
+          python -m pip install -U build
+          python -m build .
+      - uses: actions/upload-artifact@v3
+        with:
+          path: dist/*
+
+  upload_pypi:
+    environment:
+      name: pypi
+      url: https://pypi.org/p/showyourwork2
+    permissions:
+      id-token: write
+    needs: [tests, build]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: artifact
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@v1.8.6

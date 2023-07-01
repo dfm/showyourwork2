@@ -1,7 +1,6 @@
-import snakemake_staging
-from snakemake_staging.stages import NoOpStage
+from showyourwork.plugins import staging
 
-stage = NoOpStage("stage", config.get("restore", False))
+stage = staging.NoOpStage("stage", config.get("restore", False))
 
 rule a:
     output:
@@ -10,4 +9,4 @@ rule a:
         raise ValueError("this should not be executed")
 
 include:
-    snakemake_staging.snakefile()
+    staging.snakefile()

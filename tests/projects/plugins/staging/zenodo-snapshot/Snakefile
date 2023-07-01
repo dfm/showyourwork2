@@ -1,7 +1,6 @@
-import snakemake_staging
-from snakemake_staging.zenodo import ZenodoStage
+from showyourwork.plugins import staging
 
-stage = ZenodoStage(
+stage = staging.ZenodoStage(
     "stage",
     config.get("restore", False),
     "stage.json",
@@ -18,4 +17,4 @@ rule a:
         """
 
 include:
-    snakemake_staging.snakefile()
+    staging.snakefile()

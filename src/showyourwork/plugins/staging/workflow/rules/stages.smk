@@ -1,6 +1,7 @@
 from pathlib import Path
-from snakemake_staging import stages, utils
-from snakemake_staging.config import _CONFIG
+from showyourwork import utils
+from showyourwork.plugins.staging import stages
+from showyourwork.plugins.staging.config import _CONFIG
 
 previously_included = set()
 for name, stage in stages.STAGES.items():
