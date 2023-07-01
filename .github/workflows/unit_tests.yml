@@ -77,7 +77,7 @@ jobs:
         with:
           path: dist/*
 
-  upload_pypi:
+  publish:
     environment:
       name: pypi
       url: https://pypi.org/p/showyourwork2
