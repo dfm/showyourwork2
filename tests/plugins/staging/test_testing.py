@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import List
 
 import pytest
-from showyourwork.testing import TemporaryDirectory, run_snakemake
+from showyourwork2.testing import TemporaryDirectory, run_snakemake
 
 
 @pytest.mark.parametrize("force_explicit", [True, False])

@@ -1,8 +1,8 @@
-/backup
+.vscode
 **/__pycache__
 **/.showyourwork
 **/.snakemake
-src/showyourwork/version.py
+**/version.py
 *.egg-info
 .eggs
 .coverage
@@ -10,8 +10,7 @@ src/showyourwork/version.py
 htmlcov
 junit
 **/sitecustomize.py
-dist/*
-.vscode
+/dist
 /build
 .test
 *.json

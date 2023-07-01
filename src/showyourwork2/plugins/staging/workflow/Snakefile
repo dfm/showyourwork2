@@ -1,0 +1,4 @@
+from showyourwork2.paths import package_data
+
+include: package_data("showyourwork2.plugins.staging", "workflow", "rules", "common.smk")
+include: package_data("showyourwork2.plugins.staging", "workflow", "rules", "stages.smk")

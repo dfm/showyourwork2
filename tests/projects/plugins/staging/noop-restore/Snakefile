@@ -1,4 +1,4 @@
-from showyourwork.plugins import staging
+from showyourwork2.plugins import staging
 
 stage = staging.NoOpStage("stage", config.get("restore", False))
 

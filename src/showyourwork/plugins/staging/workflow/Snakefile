@@ -1,3 +1,0 @@
-from showyourwork.paths import package_data
-
-include: package_data("showyourwork.plugins.staging", "workflow", "rules", "stages.smk")
