@@ -10,6 +10,7 @@
 htmlcov
 junit
 **/sitecustomize.py
+.nox
 /dist
 /build
 .test
