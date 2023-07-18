@@ -1,4 +1,4 @@
-name: tests
+name: Tests
 
 on:
   push:
@@ -20,40 +20,47 @@ jobs:
       matrix:
         platform:
           - ubuntu-latest
-        python-version:
-          - "3.9"
-          - "3.10"
-          - "3.11"
+        nox-session:
+          - "tests(python='3.9', snakemake='latest')"
+          - "tests(python='3.10', snakemake='latest')"
+          - "tests(python='3.11', snakemake='latest')"
+
+          # Test backwards comaptibility with oldest supported snakemake version
+          - "tests(python='3.9', snakemake='oldest')"
+
+          # Test that the examples execute
+          - "examples(python='3.11', snakemake='latest')"
+          - "examples(python='3.9', snakemake='oldest')"
+
+          # Check for lint
+          - "lint"
+
         include:
+          # Test on macOS
           - platform: macos-latest
-            python-version: "3.10"
+            nox-session: "tests(python='3.11', snakemake='latest')"
+
+          # TODO(dfm): Test on Windows - there are currently many failures
           # - platform: windows-latest
-          #   python-version: "3.10"
+          #   nox-session: "tests(python='3.11', snakemake='latest')"
 
     runs-on: ${{ matrix.platform }}
-    name: unit tests
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          submodules: recursive
 
       - name: Set up Mamba
         uses: mamba-org/setup-micromamba@v1
         with:
           environment-name: test-env
           create-args: >-
-            python=${{ matrix.python-version }}
             mamba
-
-      - name: Install showyourwork
-        run: |
-          python -m pip install -U pip
-          python -m pip install -e ".[test]"
+            nox
 
       - name: Run tests
-        run: python -m pytest -v tests
+        run: python -m nox --non-interactive -s "${{ matrix.nox-session }}"
 
   build:
     runs-on: ubuntu-latest

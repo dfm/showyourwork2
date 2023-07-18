@@ -31,6 +31,10 @@ def get_logger(
     return logger
 
 
+def pass_log_info(msg: str) -> bool:
+    return msg.startswith("Nothing to be done") or msg.startswith("Deleting ")
+
+
 def patch_snakemake_logging(config: Dict[str, Any]) -> None:
     verbose = config.get("verbose", False)
     logger = get_logger(config)
@@ -39,9 +43,8 @@ def patch_snakemake_logging(config: Dict[str, Any]) -> None:
     for handler in snakemake_logger.logger.handlers:
         if isinstance(handler, logging.FileHandler):
             handler.setLevel(logging.DEBUG)
-        else:
-            if not verbose:
-                handler.setLevel(logging.CRITICAL)
+        elif not verbose:
+            handler.setLevel(logging.CRITICAL)
 
     # Custom Snakemake stdout handler
     if not hasattr(snakemake_logger, "custom_stream_handler"):
@@ -69,7 +72,7 @@ def patch_snakemake_logging(config: Dict[str, Any]) -> None:
         level = msg["level"]
         if level == "job_info":
             logger.info(text)
-        elif level == "info" and text.startswith("Nothing to be done"):
+        elif level == "info" and pass_log_info(text):
             logger.info(text)
 
     if not verbose:
