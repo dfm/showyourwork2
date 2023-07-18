@@ -61,7 +61,7 @@ jobs:
             nox
 
       - name: Run tests
-        run: python -m nox --non-interactive -s ${{ matrix.nox-session }}
+        run: python -m nox --non-interactive -s "${{ matrix.nox-session }}"
 
   build:
     runs-on: ubuntu-latest
