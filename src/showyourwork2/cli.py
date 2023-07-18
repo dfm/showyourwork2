@@ -3,7 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 from shutil import rmtree
-from typing import Iterable, Optional
+from typing import Any, Callable, Iterable, Optional
 
 import click
 
@@ -25,33 +25,38 @@ def main() -> None:
     pass
 
 
+def build_arguments(func: Callable[..., Any]) -> Callable[..., Any]:
+    func = click.argument("snakemake_args", nargs=-1, type=click.UNPROCESSED)(func)
+    func = click.option(
+        "--conda-frontend",
+        default=None,
+        type=str,
+        help="The conda frontend to use; passed to snakemake",
+    )(func)
+    func = click.option(
+        "-c",
+        "--cores",
+        default="all",
+        help="Number of cores to use; passed to snakemake",
+    )(func)
+    func = click.option(
+        "-f",
+        "--configfile",
+        type=click.Path(exists=True),
+        help="A showyourwork configuration file",
+    )(func)
+    func = click.option(
+        "-v", "--verbose", is_flag=True, help="Print verbose output to the console"
+    )(func)
+    return func
+
+
 @main.command(  # type: ignore[attr-defined]
     context_settings=dict(
         ignore_unknown_options=True,
     )
 )
-@click.option(
-    "-v", "--verbose", is_flag=True, help="Print verbose output to the console"
-)
-@click.option(
-    "-f",
-    "--configfile",
-    type=click.Path(exists=True),
-    help="A showyourwork configuration file",
-)
-@click.option(
-    "-c",
-    "--cores",
-    default="all",
-    help="Number of cores to use; passed to snakemake",
-)
-@click.option(
-    "--conda-frontend",
-    default=None,
-    type=str,
-    help="The conda frontend to use; passed to snakemake",
-)
-@click.argument("snakemake_args", nargs=-1, type=click.UNPROCESSED)
+@build_arguments
 def build(
     verbose: bool,
     configfile: Optional[paths.PathLike],
@@ -74,33 +79,12 @@ def build(
         ignore_unknown_options=True,
     )
 )
-@click.option(
-    "-v", "--verbose", is_flag=True, help="Print verbose output to the console"
-)
-@click.option(
-    "-f",
-    "--configfile",
-    type=click.Path(exists=True),
-    help="A showyourwork configuration file",
-)
-@click.option(
-    "-c",
-    "--cores",
-    default="all",
-    help="Number of cores to use; passed to snakemake",
-)
-@click.option(
-    "--conda-frontend",
-    default=None,
-    type=str,
-    help="The conda frontend to use; passed to snakemake",
-)
+@build_arguments
 @click.option(
     "--deep",
     is_flag=True,
     help="Also delete the temporary 'showyourwork' and 'snakemake' directories",
 )
-@click.argument("snakemake_args", nargs=-1, type=click.UNPROCESSED)
 def clean(
     verbose: bool,
     configfile: Optional[paths.PathLike],
