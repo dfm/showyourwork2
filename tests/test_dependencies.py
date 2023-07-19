@@ -23,7 +23,7 @@ def test_explicit_dependencies() -> None:
 
 
 work_path = Path("/work")
-repo_path = Path("/repo")
+repo_path = Path()
 
 
 def work(*x: str) -> str:
@@ -41,7 +41,7 @@ def test_simplify() -> None:
         work("d"): [repo("d"), work("e")],
         work("e"): [repo("c")],
     }
-    output_tree = simplify_dependency_tree(input_tree, repo_path, work_path)
+    output_tree = simplify_dependency_tree(input_tree, work_path)
     assert output_tree == {"a": ["c", "d"]}
 
 
@@ -50,5 +50,5 @@ def test_simplify_with_directory() -> None:
         repo("a"): [work("b", "c"), repo("c")],
         work("b"): [repo("d")],
     }
-    output_tree = simplify_dependency_tree(input_tree, repo_path, work_path)
+    output_tree = simplify_dependency_tree(input_tree, work_path)
     assert output_tree == {"a": ["c", "d"]}

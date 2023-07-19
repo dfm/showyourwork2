@@ -12,7 +12,7 @@ for doc in SYW__DOCUMENTS:
         name:
             utils.rule_name("copy", "doc", document=doc)
         input:
-            SYW__REPO_PATHS.root / doc
+            doc
         output:
             SYW__WORK_PATHS.root / doc
         run:

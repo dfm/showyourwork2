@@ -9,7 +9,7 @@ def sywplug_tex__local_or_provided_style(document):
     """Get the path to the showyourwork.sty file. We prefer to use the one
     provided by the user if it exists, but will provide our own if not.
     """
-    path = (SYW__REPO_PATHS.root / document).parent / "showyourwork.sty"
+    path = Path(document).parent / "showyourwork.sty"
     if path.is_file():
         return path
     else:
@@ -24,7 +24,7 @@ for base_path in [SYW__WORK_PATHS / "dependencies", SYW__WORK_PATHS / "build"]:
         Copy explicit dependencies to the working directory.
         """
         name:
-            sywplug_tex__rule_name("copy", slug)
+            sywplug_tex__rule_name("copy", "dependencies", "to", slug)
         input:
             "{file}"
         output:

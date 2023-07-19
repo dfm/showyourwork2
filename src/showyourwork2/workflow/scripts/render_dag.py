@@ -6,8 +6,6 @@ import graphviz
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--config")
-parser.add_argument("--repo-path")
-parser.add_argument("--work-path")
 parser.add_argument("--thumbnails-path")
 parser.add_argument("--output")
 args = parser.parse_args()
@@ -15,8 +13,6 @@ args = parser.parse_args()
 with open(args.config, "r") as f:
     config = json.load(f)
 
-repo_path = Path(args.repo_path)
-work_path = Path(args.work_path)
 thumbnails_path = Path(args.thumbnails_path)
 
 tree = config["_dependency_tree_simple"]

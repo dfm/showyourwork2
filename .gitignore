@@ -18,4 +18,5 @@ junit
 *.png
 *.svg
 *.pdf
+*.synctex.gz
 .*_cache

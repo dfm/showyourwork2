@@ -3,12 +3,10 @@ import subprocess
 from pathlib import Path
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--repo-path")
 parser.add_argument("--output")
 parser.add_argument("files", nargs="*")
 args = parser.parse_args()
 
-repo_path = Path(args.repo_path)
 output_directory = Path(args.output)
 
 for file in args.files:

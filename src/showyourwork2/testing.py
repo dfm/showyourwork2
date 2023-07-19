@@ -86,7 +86,6 @@ class run:
         shutil.copytree(
             test_project_root, tmpdir, ignore=ignore_expected, dirs_exist_ok=True
         )
-        print(list(tmpdir.glob("*")))
         with cwd(tmpdir):
             self.execute(
                 *args,

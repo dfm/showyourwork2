@@ -33,13 +33,10 @@ rule:
         script=package_data("showyourwork2", "workflow", "scripts", "render_thumbnails.py"),
     output:
         directory(SYW__WORK_PATHS.root / "thumbnails")
-    params:
-        repo_path=SYW__REPO_PATHS.root
     conda:
         package_data("showyourwork2", "workflow", "envs", "render_thumbnails.yml")
     shell:
         "python {input.script:q} "
-        "--repo-path {params.repo_path:q} "
         "--output {output:q} "
         "{input.files:q} "
 
@@ -54,16 +51,11 @@ rule:
         script=package_data("showyourwork2", "workflow", "scripts", "render_dag.py")
     output:
         dag_directory / dag_filename
-    params:
-        repo_path=SYW__REPO_PATHS.root,
-        work_path=SYW__WORK_PATHS.root
     conda:
         package_data("showyourwork2", "workflow", "envs", "render_dag.yml")
     shell:
         "python {input.script:q} "
         "--config {input.config:q} "
-        "--repo-path {params.repo_path:q} "
-        "--work-path {params.work_path:q} "
         "--thumbnails-path {input.thumbnails:q} "
         "--output {output:q} "
 

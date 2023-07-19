@@ -24,9 +24,9 @@ for doc, explicit_deps in SYW__DOCUMENTS.items():
         Run tectonic to produce the XML log file tracking all data dependencies.
         """
         name:
-            sywplug_tex__rule_name("xml", document=doc)
+            sywplug_tex__rule_name("dependecies", "list", document=doc)
         message:
-            f"Determining dependencies of '{Path(doc).name}'"
+            f"Listing dependencies of '{Path(doc).name}'"
         input:
             document=deps_dir / doc,
             dependencies=[deps_dir / d for d in explicit_deps],
@@ -39,7 +39,8 @@ for doc, explicit_deps in SYW__DOCUMENTS.items():
         shell:
             "tectonic "
             "--chatter minimal "
-            "--keep-logs --keep-intermediates "
+            "--keep-logs "
+            "--keep-intermediates "
             "{input.document:q} "
 
     rule:
@@ -48,7 +49,7 @@ for doc, explicit_deps in SYW__DOCUMENTS.items():
         formatted dependency structure.
         """
         name:
-            sywplug_tex__rule_name("dependencies", document=doc)
+            sywplug_tex__rule_name("dependencies", "parse", document=doc)
         message:
             f"Parsing dependencies of '{Path(doc).name}'"
         input:
@@ -56,7 +57,7 @@ for doc, explicit_deps in SYW__DOCUMENTS.items():
         output:
             SYW__WORK_PATHS.dependencies_for(doc)
         run:
-            base_path = (SYW__REPO_PATHS.root / doc).parent
+            base_path = Path(doc).parent
             parse_dependencies(input[0], output[0], base_path)
 
 rule:

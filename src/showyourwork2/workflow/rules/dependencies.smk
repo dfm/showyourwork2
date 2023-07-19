@@ -72,7 +72,7 @@ def ensure_all_document_dependencies(*_):
     # with access to the computed dependency tree.
     config["_dependency_tree"] = parents
     config["_dependency_tree_simple"] = simplify_dependency_tree(
-        parents, SYW__REPO_PATHS.root, SYW__WORK_PATHS.root
+        parents, SYW__WORK_PATHS.root
     )
 
     return []

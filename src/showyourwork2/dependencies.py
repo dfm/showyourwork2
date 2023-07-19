@@ -3,13 +3,13 @@ from typing import Dict, List, Optional, Set
 
 
 def relative_or_skip(
-    input_path: str, repo_path: Path, skip_path: Optional[Path] = None
+    input_path: str, skip_path: Optional[Path] = None
 ) -> Optional[str]:
-    path = Path(input_path).resolve()
+    path = Path(input_path)
     if skip_path is not None and path.is_relative_to(skip_path):
         return None
     try:
-        return str(path.relative_to(repo_path))
+        return str(path)
     except ValueError:
         return None
 
@@ -33,11 +33,11 @@ def get_including_directory(tree: Dict[str, List[str]], query: str) -> List[str]
 
 
 def simplify_dependency_tree(
-    full_tree: Dict[str, List[str]], repo_path: Path, skip_path: Optional[Path] = None
+    full_tree: Dict[str, List[str]], skip_path: Optional[Path] = None
 ) -> Dict[str, List[str]]:
     tree: Dict[str, Set[str]] = {}
     for file, parents in full_tree.items():
-        path = relative_or_skip(file, repo_path, skip_path)
+        path = relative_or_skip(file, skip_path)
         if path is None:
             continue
         tree[str(path)] = set()
@@ -45,7 +45,7 @@ def simplify_dependency_tree(
             todo = [parent]
             while len(todo):
                 query = todo.pop()
-                qpath = relative_or_skip(query, repo_path, skip_path)
+                qpath = relative_or_skip(query, skip_path)
                 if qpath is None:
                     todo += get_including_directory(full_tree, query)
                 else:
