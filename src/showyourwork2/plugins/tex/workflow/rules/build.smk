@@ -1,3 +1,5 @@
+from showyourwork2.plugins.tex.synctex import fix_synctex_paths
+
 build_dir = SYW__WORK_PATHS.build
 enable_synctex = config.get("tex", {}).get("synctex", True)
 
@@ -66,4 +68,4 @@ for doc in SYW__DOCUMENTS:
             output:
                 Path(doc).with_suffix(".synctex.gz")
             run:
-                utils.copy_file_or_directory(input[0], output[0])
+                fix_synctex_paths(build_dir.resolve(), input[0], output[0])

@@ -35,7 +35,7 @@ def update_config(config: Dict[str, Any], schema: Dict[str, Any]) -> None:
     config["documents"] = documents
 
     # Generate the list of artifacts from the input list of documents
-    artifacts = list(*config.get("artifacts", []))
+    artifacts = list(config.get("artifacts", []))
     for doc in config.get("documents", []):
         if isinstance(doc, str):
             name = doc

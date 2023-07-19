@@ -20,12 +20,16 @@ SYW__DOCUMENTS = config["documents"]
 SYW__REPO_PATHS = paths.repo(config)
 SYW__WORK_PATHS = paths.work(config)
 
-_artifacts_list = ", ".join(map("'{}'".format, config.get("artifacts", [])))
+# This is used for printing the list of artifact names
+_list_artifacts = ", ".join(map("'{}'".format, config.get("artifacts", [])))
+
 rule all:
     message:
-        f"Generating artifacts: {_artifacts_list}"
+        f"Generating artifacts: {_list_artifacts}"
     input:
         config.get("artifacts", [])
+
+del _list_artifacts
 
 rule:
     name:

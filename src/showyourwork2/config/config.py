@@ -6,6 +6,7 @@ import yaml
 from jsonschema import ValidationError as JSONSchemaValidationError
 from jsonschema import validate, validators
 
+from showyourwork2 import git
 from showyourwork2.paths import PathLike, package_data
 from showyourwork2.version import __version__
 
@@ -51,6 +52,11 @@ def normalize_keys(config: Any) -> Any:
     return config
 
 
+def filter_files_below(file_list: List[str], file: PathLike) -> List[str]:
+    parent = Path(file).parent
+    return [f for f in file_list if Path(f).is_relative_to(parent)]
+
+
 def parse_config(config: Dict[str, Any], required_version: int = 2) -> Dict[str, Any]:
     config = normalize_keys(config)
 
@@ -66,7 +72,7 @@ def parse_config(config: Dict[str, Any], required_version: int = 2) -> Dict[str,
     # Extract the plugins and add the default TeX plugin if required
     plugins = config.get("plugins", ["showyourwork2.plugins.tex"])
     if "showyourwork2.plugins.tex" not in plugins and not config.get("notex", False):
-        plugins = ["showyourwork2.plugins.tex"] + list(*plugins)
+        plugins = ["showyourwork2.plugins.tex"] + list(plugins)
     config["plugins"] = plugins
 
     # Loop over the plugins and parse their configs
@@ -85,11 +91,18 @@ def parse_config(config: Dict[str, Any], required_version: int = 2) -> Dict[str,
             f"following error:\n\n{e}"
         ) from e
 
+    # If `find_git_dependencies` is set to True, we use git to find the
+    # dependencies for each document, defined as any file tracked by git that is
+    # in the same directory as the document or an subdirectories.
+    find_git_dependencies = config.get("find_git_dependencies", True)
+    if find_git_dependencies:
+        git_files = git.list_files()
+
     # Extract the list of documents and their dependencies and fill it out. The
     # resulting 'documents' config item is keyed by document path and has a list
     # of dependencies, including the global dependencies defined in
     # 'document_dependencies' and the per-document dependencies.
-    document_dependencies = list(config.get("document_dependencies", []))
+    document_dependencies: List[str] = list(config.get("document_dependencies", []))
     input_documents = config.get("documents", [])
     if not len(input_documents):
         raise ValidationError(
@@ -99,13 +112,16 @@ def parse_config(config: Dict[str, Any], required_version: int = 2) -> Dict[str,
     documents: Dict[str, List[str]] = {}
     for doc in input_documents:
         if isinstance(doc, str):
-            documents[doc] = document_dependencies
+            key = doc
+            documents[key] = document_dependencies
         else:
-            documents[doc["path"]] = document_dependencies + list(
-                doc.get("dependencies", [])
-            )
+            key = doc["path"]
+            documents[key] = document_dependencies + list(doc.get("dependencies", []))
+        if find_git_dependencies:
+            documents[key] = filter_files_below(git_files, key)
     config["document_dependencies"] = document_dependencies
     config["documents"] = documents
+    print(documents)
 
     return config
 
