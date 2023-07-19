@@ -121,7 +121,6 @@ def parse_config(config: Dict[str, Any], required_version: int = 2) -> Dict[str,
             documents[key] = filter_files_below(git_files, key)
     config["document_dependencies"] = document_dependencies
     config["documents"] = documents
-    print(documents)
 
     return config
 
