@@ -92,7 +92,8 @@ class work(PathMeta):
         else:
             working_directory = Path(working_directory)
         working_directory.mkdir(parents=True, exist_ok=True)
-        self.root = working_directory
+        repo_root = find_project_root()
+        self.root = working_directory.relative_to(repo_root)
 
     def plugin(self, name: str, *others: PathLike) -> Path:
         return self.subdir("plugins", name, *others)

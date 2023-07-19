@@ -20,7 +20,10 @@ SYW__DOCUMENTS = config["documents"]
 SYW__REPO_PATHS = paths.repo(config)
 SYW__WORK_PATHS = paths.work(config)
 
+_artifacts_list = ", ".join(map("'{}'".format, config.get("artifacts", [])))
 rule all:
+    message:
+        f"Generating artifacts: {_artifacts_list}"
     input:
         config.get("artifacts", [])
 

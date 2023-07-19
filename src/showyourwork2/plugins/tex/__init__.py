@@ -11,6 +11,7 @@ def snakefiles() -> List[Path]:
 
 
 def update_config(config: Dict[str, Any], schema: Dict[str, Any]) -> None:
+    from showyourwork2.logging import get_logger
     from showyourwork2.paths import package_data
 
     # Load the schema to be used for validation of these plugin-specific options
@@ -23,6 +24,15 @@ def update_config(config: Dict[str, Any], schema: Dict[str, Any]) -> None:
     tex_config = config.get("tex", {})
     enable_synctex = tex_config["synctex"] = tex_config.get("synctex", True)
     config["tex"] = tex_config
+
+    # If no documents are provided, we default to generating a single document
+    # called "ms.tex" or "src/tex/ms.tex"
+    documents = config.get("documents", [])
+    for d in ["ms.tex", "src/tex/ms.tex"]:
+        if Path(d).is_file():
+            get_logger().debug(f"Found default document {d}; adding to document list")
+            documents.append(d)
+    config["documents"] = documents
 
     # Generate the list of artifacts from the input list of documents
     artifacts = list(*config.get("artifacts", []))

@@ -56,8 +56,8 @@ for doc in SYW__DOCUMENTS:
     if enable_synctex:
         rule:
             """
-            Copy the output SyncTeX from the output directory to the same directory as
-            the source file.
+            Copy the output SyncTeX from the output directory to the same
+            directory as the source file.
             """
             name:
                 sywplug_tex__rule_name("build", "output", "synctex", document=doc)
