@@ -38,6 +38,12 @@ properties:
               items:
                 type: string
 
+  artifacts:
+    description: "A list of artifacts to build; this should typically be populated programmatically"
+    type: array
+    items:
+      type: string
+
   github:
     description: "Information about the GitHub repository"
     type: object

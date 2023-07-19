@@ -22,7 +22,7 @@ SYW__WORK_PATHS = paths.work(config)
 
 rule all:
     input:
-        [Path(doc).with_suffix(".pdf") for doc in SYW__DOCUMENTS]
+        config.get("artifacts", [])
 
 rule:
     name:
