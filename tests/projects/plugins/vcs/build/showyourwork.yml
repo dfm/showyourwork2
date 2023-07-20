@@ -1,0 +1,3 @@
+config-version: 2
+plugins:
+  - showyourwork2.plugins.vcs
