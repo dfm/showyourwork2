@@ -25,6 +25,8 @@ def fix_synctex_paths(build_dir: PathLike, source: PathLike, target: PathLike) -
                         pass
                     else:
                         if path_.exists():
-                            result = ":".join(parts[:-1] + [str(path_)]).encode()
+                            result = ":".join(
+                                parts[:-1] + [str(path_.absolute())]
+                            ).encode()
             result += b"\n"
             f.write(result)
