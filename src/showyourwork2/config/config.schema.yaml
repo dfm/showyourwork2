@@ -21,10 +21,6 @@ properties:
     items:
       type: string
 
-  find_git_dependencies:
-    description: "If true, automatically find all dependencies in and below the document directory that are tracked by git"
-    type: boolean
-
   documents:
     description: "A list of documents to build"
     type: array

@@ -1,17 +1,10 @@
-import json
 import re
 from pathlib import Path
-from typing import Any, Iterable, List
+from typing import Iterable, List
 from xml.etree import ElementTree
 
 from showyourwork2 import paths
-
-
-class PathEncoder(json.JSONEncoder):
-    def default(self, obj: Any) -> str:
-        if isinstance(obj, Path):
-            return str(obj)
-        return super().default(obj)
+from showyourwork2.utils import json_dump
 
 
 def parse_dependencies(
@@ -82,10 +75,6 @@ def parse_dependencies(
     files = convert_paths(files)
 
     with open(depfile, "w") as f:
-        json.dump(
-            {"figures": figures, "unlabeled": unlabeled_graphics, "files": files},
-            f,
-            sort_keys=True,
-            indent=2,
-            cls=PathEncoder,
+        json_dump(
+            {"figures": figures, "unlabeled": unlabeled_graphics, "files": files}, f
         )

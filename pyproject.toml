@@ -41,7 +41,15 @@ docs = [
     "jinja2>=2.11.3",
     "sphinxcontrib-programoutput>=0.17",
 ]
-dev = ["pre-commit", "black", "ruff", "mypy", "nox"]
+dev = [
+    "pre-commit",
+    "black",
+    "ruff",
+    "mypy",
+    "nox",
+    "types-PyYAML",
+    "types-requests",
+]
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]

@@ -12,6 +12,7 @@ from tempfile import TemporaryDirectory as _TemporaryDirectory
 from typing import Any, Generator, Iterable, List, Optional, Union
 
 from showyourwork2 import cli
+from showyourwork2.git import git
 from showyourwork2.paths import PathLike, find_project_root
 
 # We put all the conda environments in a single directory so that we can reuse
@@ -68,6 +69,7 @@ class run:
         show_diff: bool = False,
         diff_command: Union[str, Iterable[str]] = ("diff", "-u"),
         expected_dirname: PathLike = "expected",
+        git_init: bool = False,
         **kwargs: Any,
     ):
         self._directory = TemporaryDirectory(path, args)
@@ -87,6 +89,12 @@ class run:
             test_project_root, tmpdir, ignore=ignore_expected, dirs_exist_ok=True
         )
         with cwd(tmpdir):
+            if git_init:
+                git(["init", "."])
+                git(["add", "."])
+                git(["commit", '--author="showyourwork <>"', "-m", "initial commit"])
+
+            # Execute the command implemented by subclasses
             self.execute(
                 *args,
                 cwd=tmpdir,
@@ -189,6 +197,7 @@ class run_snakemake(run):
         show_diff: bool = False,
         diff_command: Union[str, Iterable[str]] = ("diff", "-u"),
         expected_dirname: PathLike = "expected",
+        git_init: bool = False,
         conda_frontend: str = "mamba",
         **kwargs: Any,
     ):
@@ -213,6 +222,7 @@ class run_snakemake(run):
             show_diff=show_diff,
             diff_command=diff_command,
             expected_dirname=expected_dirname,
+            git_init=git_init,
             **kwargs,
         )
 
@@ -227,6 +237,7 @@ class run_showyourwork(run):
         show_diff: bool = False,
         diff_command: Union[str, Iterable[str]] = ("diff", "-u"),
         expected_dirname: PathLike = "expected",
+        git_init: bool = False,
         configfile: Optional[PathLike] = None,
         cores: str = "1",
         conda_frontend: Optional[str] = "mamba",
@@ -239,6 +250,7 @@ class run_showyourwork(run):
             show_diff=show_diff,
             diff_command=diff_command,
             expected_dirname=expected_dirname,
+            git_init=git_init,
             configfile=configfile,
             cores=cores,
             conda_frontend=conda_frontend,
