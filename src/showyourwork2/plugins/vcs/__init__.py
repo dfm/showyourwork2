@@ -16,6 +16,7 @@ def filter_files_below(file_list: List[str], file: PathLike) -> List[str]:
 
 def postprocess_config(config: Dict[str, Any]) -> None:
     git_files = git.list_files()
+    print(git_files)
     for key, deps in config["documents"].items():
         git_deps = filter_files_below(git_files, key)
         config["documents"][key] = list(deps) + git_deps

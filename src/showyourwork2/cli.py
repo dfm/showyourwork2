@@ -3,9 +3,10 @@ import subprocess
 import sys
 from pathlib import Path
 from shutil import rmtree
-from typing import Any, Callable, Iterable, Optional
+from typing import Any, Callable, Iterable, Optional, Tuple
 
 import click
+import snakemake
 
 from showyourwork2 import logging, paths
 from showyourwork2.config import load_config
@@ -94,7 +95,7 @@ def clean(
     deep: bool,
 ) -> None:
     """Delete all the outputs associated with a previous build."""
-    snakemake_args = tuple(*snakemake_args) + ("--delete-all-output",)
+    snakemake_args = list(snakemake_args) + ["--delete-all-output"]
     _build(
         verbose=verbose,
         configfile=configfile,
@@ -114,13 +115,16 @@ def clean(
     )
 
     if deep:
-        config = load_config(get_config_file(configfile))
+        config_file, cwd, _ = get_config_file_and_project_root(
+            snakemake_args=snakemake_args, config_file=configfile
+        )
+        config = load_config(config_file)
         logger = logging.get_logger(config)
-        syw_dir = paths.work(config).root
+        syw_dir = cwd / paths.work(config).root
         if syw_dir.is_dir():
             logger.info(f"Deleting directory {syw_dir}")
             rmtree(syw_dir)
-        snakemake_dir = Path(".snakemake")
+        snakemake_dir = cwd / ".snakemake"
         if snakemake_dir.is_dir():
             logger.info(f"Deleting directory {snakemake_dir}")
             rmtree(snakemake_dir)
@@ -147,9 +151,21 @@ def _build(
     )
 
 
-def get_config_file(config_file: Optional[paths.PathLike] = None) -> Path:
-    cwd = paths.find_project_root()
+def get_config_file_and_project_root(
+    snakemake_args: Iterable[str] = (), config_file: Optional[paths.PathLike] = None
+) -> Tuple[Path, Path, Iterable[str]]:
     if config_file is None:
+        # Parse the snakemake arguments using the snakemake parser to identify if
+        # there are any targets included.
+        snakemake_parser = snakemake.get_argument_parser()
+        parsed_args = snakemake_parser.parse_args(list(snakemake_args))
+
+        # Check if any of the targets are paths. We're defining paths as anything
+        # with multiple "parts", since anything without multiple parts will be found
+        # anyways. If so, we'll use those to find the project root.
+        target_paths = [t for t in parsed_args.target if len(Path(t).parts) > 1]
+
+        cwd = paths.find_project_root(*target_paths)
         config_file = cwd / "showyourwork.yml"
         if not config_file.is_file():
             config_file = cwd / "showyourwork.yaml"
@@ -159,7 +175,10 @@ def get_config_file(config_file: Optional[paths.PathLike] = None) -> Path:
                 "Please specify a configuration file using the '--configfile' command "
                 "line argument."
             )
-    return Path(config_file)
+    else:
+        cwd = Path(config_file).parent
+        target_paths = []
+    return Path(config_file), cwd, target_paths
 
 
 def run_snakemake(
@@ -170,8 +189,17 @@ def run_snakemake(
     check: bool = True,
     extra_args: Iterable[str] = (),
 ) -> int:
-    cwd = paths.find_project_root()
-    config_file = get_config_file(config_file)
+    # Find the project root (that's where we execute snakemake from), and the
+    # configuration file there.
+    config_file, cwd, target_paths = get_config_file_and_project_root(
+        snakemake_args=extra_args, config_file=config_file
+    )
+
+    # Update any target paths to be relative to the project root
+    extra_args = [
+        str(Path(a).resolve().relative_to(cwd)) if a in target_paths else a
+        for a in extra_args
+    ]
 
     # If the user didn't specify a conda frontend, then we'll try to use mamba
     # if it exists. If not, we assume that conda is available and let snakemake
