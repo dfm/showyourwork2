@@ -47,3 +47,17 @@ def list_files() -> List[str]:
     files += list(r.stdout.splitlines())
 
     return list(sorted(set(files)))
+
+
+def commit(message: str, name: str = "showyourwork", email: str = "<>") -> None:
+    git(
+        [
+            "commit",
+            "-c",
+            f"user.name='{name}'",
+            "-c",
+            f"user.email='{email}'",
+            "-m",
+            message,
+        ]
+    )

@@ -12,6 +12,7 @@ from tempfile import TemporaryDirectory as _TemporaryDirectory
 from typing import Any, Generator, Iterable, List, Optional, Union
 
 from showyourwork2 import cli
+from showyourwork2.git import commit as git_commit
 from showyourwork2.git import git
 from showyourwork2.paths import PathLike, find_project_root
 
@@ -92,7 +93,7 @@ class run:
             if git_init:
                 git(["init", "."])
                 git(["add", "."])
-                git(["commit", '--author="showyourwork <>"', "-m", "initial commit"])
+                git_commit("initial commit")
 
             # Execute the command implemented by subclasses
             self.execute(
