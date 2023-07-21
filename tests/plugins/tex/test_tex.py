@@ -16,7 +16,10 @@ def test_tex_build() -> None:
 
 def test_tex_dependencies() -> None:
     run_showyourwork(
-        "tests/projects/plugins/tex/dependencies",
-        "sywplug_tex__dependencies",
-        show_diff=True,
+        "tests/projects/plugins/tex/dependencies", "sywplug_tex__dependencies"
     )
+
+
+def test_tex_dependencies_subdir() -> None:
+    """Test for dependency discovery when manuscript is in a subdirectory"""
+    run_showyourwork("tests/projects/plugins/tex/dependencies_subdir")

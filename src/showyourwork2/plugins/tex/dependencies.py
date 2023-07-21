@@ -8,7 +8,10 @@ from showyourwork2.utils import json_dump
 
 
 def parse_dependencies(
-    xmlfile: paths.PathLike, depfile: paths.PathLike, base_path: paths.PathLike
+    xmlfile: paths.PathLike,
+    depfile: paths.PathLike,
+    base_path: paths.PathLike,
+    project_root: paths.PathLike,
 ) -> None:
     base_path = Path(base_path).resolve()
     xmlfile = Path(xmlfile)
@@ -68,7 +71,7 @@ def parse_dependencies(
 
     # Convert all the paths to be relative to the project root
     def convert_paths(paths: Iterable[Path]) -> List[Path]:
-        return [f.relative_to(base_path) for f in paths]
+        return [f.relative_to(project_root) for f in paths]
 
     figures = {k: convert_paths(v) for k, v in figures.items()}
     unlabeled_graphics = convert_paths(unlabeled_graphics)
