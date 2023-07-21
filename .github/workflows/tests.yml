@@ -60,7 +60,7 @@ jobs:
             nox
 
       - name: Save the nox session name for caching purposes
-        run: echo ${{ matrix.nox-session }} > .nox-session-name
+        run: echo "${{ matrix.nox-session }}" > .nox-session-name
 
       - name: Cache the test conda environments
         uses: actions/cache@v3
