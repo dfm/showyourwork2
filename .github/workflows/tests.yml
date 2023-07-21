@@ -65,10 +65,8 @@ jobs:
       - name: Cache the test conda environments
         uses: actions/cache@v3
         with:
-          path: .nox/.test/conda
+          path: .test/conda
           key: ${{ runner.os }}-${{ hashFiles('.nox-session-name') }}-conda-${{ hashFiles('**/environment.yml', '**/envs/*.yml', 'src/showyourwork2/testing.py') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ hashFiles('.nox-session-name') }}-conda-
 
       - name: Clear the temporary file with the nox session name
         run: rm .nox-session-name
