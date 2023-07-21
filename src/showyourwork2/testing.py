@@ -18,7 +18,7 @@ from showyourwork2.paths import PathLike, find_project_root
 
 # We put all the conda environments in a single directory so that we can reuse
 # them between tests
-conda_prefix = str(Path().resolve() / ".test" / "conda")
+CONDA_PREFIX = str(Path().resolve() / ".test" / "conda")
 
 
 @contextmanager
@@ -211,7 +211,7 @@ class run_snakemake(run):
                 "--conda-frontend",
                 conda_frontend,
                 "--conda-prefix",
-                conda_prefix,
+                CONDA_PREFIX,
             ]
             + list(args)
         )
@@ -242,7 +242,9 @@ class run_showyourwork(run):
         configfile: Optional[PathLike] = None,
         cores: str = "1",
         conda_frontend: Optional[str] = "mamba",
+        conda_prefix: Optional[str] = CONDA_PREFIX,
     ):
+        self.conda_prefix = conda_prefix
         super().__init__(
             path,
             *args,
@@ -262,7 +264,7 @@ class run_showyourwork(run):
         find_project_root.cache_clear()
         cli._build(
             verbose=False,
-            snakemake_args=args,
+            snakemake_args=list(args) + ["--conda-prefix", self.conda_prefix],
             **kwargs,
         )
 

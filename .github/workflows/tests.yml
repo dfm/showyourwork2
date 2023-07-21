@@ -59,6 +59,20 @@ jobs:
             mamba
             nox
 
+      - name: Save the nox session name for caching purposes
+        run: echo "${{ matrix.nox-session }}" > .nox-session-name
+
+      - name: Cache the test conda environments
+        uses: actions/cache@v3
+        with:
+          path: .nox/.test/conda
+          key: ${{ runner.os }}-${{ hashFiles('.nox-session-name') }}-conda-${{ hashFiles('**/environment.yml', '**/envs/*.yml', 'src/showyourwork2/testing.py') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ hashFiles('.nox-session-name') }}-conda-
+
+      - name: Clear the temporary file with the nox session name
+        run: rm .nox-session-name
+
       - name: Run tests
         run: python -m nox --non-interactive -s "${{ matrix.nox-session }}"
 
