@@ -49,14 +49,16 @@ def list_files() -> List[str]:
     return list(sorted(set(files)))
 
 
-def commit(message: str, name: str = "showyourwork", email: str = "<>") -> None:
+def commit(
+    message: str, name: str = "showyourwork", email: str = "showyourwork@showyourwork"
+) -> None:
     git(
         [
-            "commit",
             "-c",
             f"user.name='{name}'",
             "-c",
             f"user.email='{email}'",
+            "commit",
             "-m",
             message,
         ]
