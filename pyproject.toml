@@ -43,15 +43,15 @@ docs = [
 ]
 dev = ["pre-commit", "black", "ruff", "mypy", "nox"]
 
-[tool.setuptools.packages.find]
-where = ["src"]
-
 [build-system]
-requires = ["setuptools>=61.0", "wheel", "setuptools_scm"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
 
-[tool.setuptools_scm]
-write_to = "src/showyourwork2/version.py"
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/showyourwork2/version.py"
 
 [tool.black]
 target-version = ["py38", "py39"]
