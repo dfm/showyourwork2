@@ -63,9 +63,12 @@ jobs:
         run: echo "${{ matrix.nox-session }}" > .nox-session-name
 
       - name: Cache the test conda environments
+        if: matrix.nox-session != 'lint'
         uses: actions/cache@v3
         with:
-          path: .test/conda
+          path: |
+            .test/conda
+            examples/**/.snakemake/conda
           key: ${{ runner.os }}-${{ hashFiles('.nox-session-name') }}-conda-${{ hashFiles('**/environment.yml', '**/envs/*.yml', 'src/showyourwork2/testing.py') }}
 
       - name: Clear the temporary file with the nox session name
