@@ -46,12 +46,12 @@ jobs:
 
     runs-on: ${{ matrix.platform }}
     steps:
-      - name: Checkout
+      - name: "Init: checkout"
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Set up Mamba
+      - name: "Init: mamba"
         uses: mamba-org/setup-micromamba@v1
         with:
           environment-name: test-env
@@ -59,20 +59,22 @@ jobs:
             mamba
             nox
 
-      - name: Save the nox session name for caching purposes
+      - name: "Cache: get session name"
+        if: startsWith(matrix.nox-session, 'tests')
         run: echo "${{ matrix.nox-session }}" > .nox-session-name
 
-      - name: Cache the test conda environments
+      - name: "Cache: save environments"
         if: startsWith(matrix.nox-session, 'tests')
         uses: actions/cache@v3
         with:
           path: .test/conda
           key: ${{ runner.os }}-${{ hashFiles('.nox-session-name') }}-conda-${{ hashFiles('**/environment.yml', '**/envs/*.yml', 'src/showyourwork2/testing.py') }}
 
-      - name: Clear the temporary file with the nox session name
+      - name: "Cache: remove temporary file"
+        if: startsWith(matrix.nox-session, 'tests')
         run: rm .nox-session-name
 
-      - name: Run tests
+      - name: "Tests: run"
         run: python -m nox --non-interactive -s "${{ matrix.nox-session }}"
 
   build:
