@@ -59,6 +59,12 @@ class TemporaryDirectory:
         else:
             self.tempdir.cleanup()
 
+    def __enter__(self) -> Path:
+        return self.name
+
+    def __exit__(self, *_: Any) -> None:
+        self.cleanup()
+
 
 class run:
     def __init__(

@@ -1,5 +1,0 @@
-config-version: 2
-plugins:
-  - showyourwork2.plugins.vcs
-documents:
-  - src/ms.tex

@@ -1,87 +1,81 @@
+from copy import deepcopy
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Dict
 
-from showyourwork2 import cli
-from showyourwork2.git import git
-from showyourwork2.paths import find_project_root
-from showyourwork2.testing import cwd, run_showyourwork
+import pytest
 
-
-def add_file_and_run(
-    tmp_dir: Path,
-    ms_dir: Path,
-    args: Iterable[str] = (),
-) -> None:
-    target = ms_dir / "subdir" / "another" / "file.tex"
-    target.parent.mkdir(parents=True, exist_ok=True)
-    with open(target, "w") as f:
-        f.write(r"\sywvcs")
-
-    with open(ms_dir / "ms.tex", "w") as f:
-        f.write(
-            r"""
-\documentclass{article}
-\usepackage{showyourwork}
-\usepackage{syw-vcs-simple}
-\begin{document}
-
-This is a simple document.
-\include{subdir/another/file.tex}
-
-\end{document}
-"""
-        )
-
-    # Add a new file, but don't commit it
-    with cwd(tmp_dir):
-        # Clean the repo
-        cli._build(
-            verbose=False,
-            configfile=None,
-            cores="1",
-            conda_frontend="mamba",
-            snakemake_args=list(args) + ["--delete-all-output"],
-        )
-
-        # Add the new file
-        git(["add", str(target)])
-
-        # Run a build
-        find_project_root.cache_clear()
-        cli._build(
-            verbose=False,
-            configfile=None,
-            cores="1",
-            conda_frontend="mamba",
-            snakemake_args=args,
-        )
+from showyourwork2 import git
+from showyourwork2.plugins import vcs
+from showyourwork2.testing import TemporaryDirectory, cwd, run_showyourwork
 
 
 def test_vcs_build() -> None:
-    with run_showyourwork("tests/projects/plugins/vcs/build", git_init=True) as d:
-        add_file_and_run(d, d / "src")
+    run_showyourwork("tests/projects/plugins/vcs/build", git_init=True)
 
 
-def test_vcs_repo_root() -> None:
-    """
-    Tests to make sure that the paths are correct when the git repo is not the
-    root of the project.
-    """
-    with run_showyourwork(
-        "tests/projects/plugins/vcs/repo_root", "repo/src/ms.pdf", git_init=True
-    ) as d:
-        add_file_and_run(
-            d,
-            d / "repo" / "src",
-            args=("repo/src/ms.pdf",),
-        )
-        assert (
-            d
-            / "repo"
-            / ".showyourwork"
-            / "build"
-            / "src"
-            / "subdir"
-            / "another"
-            / "file.tex"
-        ).is_file()
+@pytest.mark.parametrize("repo_root", ["", "repo_root"])
+def test_vcs_files(repo_root: str) -> None:
+    with TemporaryDirectory("vcs") as d:
+        path = Path(d) / repo_root
+        doc0 = "doc0.tex"
+        dep0 = "dep0.tex"
+
+        subdir1 = path / "subdir1"
+        subdir1.mkdir(parents=True)
+        doc1 = str((subdir1 / "doc1.tex").relative_to(path))
+        dep1 = str((subdir1 / "dep1.tex").relative_to(path))
+
+        subdir2 = path / "subdir2" / "another"
+        subdir2.mkdir(parents=True)
+        doc2 = str((subdir2 / "doc2.tex").relative_to(path))
+        dep2 = str((subdir2 / "dep2.tex").relative_to(path))
+
+        not_tracked = "not_tracked.tex"
+
+        open(path / dep0, "w").close()
+        open(path / dep1, "w").close()
+        open(path / dep2, "w").close()
+        open(path / not_tracked, "w").close()
+
+        config: Dict[str, Any] = {"documents": {doc0: [], doc1: [], doc2: []}}
+
+        def run_and_check_config(config: Dict[str, Any]) -> None:
+            c = deepcopy(config)
+            vcs.postprocess_config(c)
+
+            assert dep1 in c["documents"][doc0]
+            assert dep2 in c["documents"][doc0]
+            assert not_tracked not in c["documents"][doc0]
+
+            assert dep1 in c["documents"][doc1]
+            assert dep2 not in c["documents"][doc1]
+
+            assert dep1 not in c["documents"][doc2]
+            assert dep2 in c["documents"][doc2]
+
+        with cwd(path):
+            with pytest.raises(RuntimeError):
+                vcs.postprocess_config(config)
+
+        # Initialize the repo at the top level of the temporary directory. If
+        # repo_root is not empty, the actual project is below this top level.
+        git.git(["init", "."], cwd=d)
+
+        with cwd(path):
+            # Before adding any files, we shouldn't find any dependencies
+            c = dict(**config)
+            vcs.postprocess_config(c)
+            assert c["documents"][doc0] == []
+            assert c["documents"][doc1] == []
+            assert c["documents"][doc2] == []
+
+            # After adding the dependencies, they should be discovered
+            git.git(["add", str(path / dep0), str(path / dep1), str(path / dep2)])
+            run_and_check_config(config)
+
+            # Just check that this didn't change the original config
+            assert config["documents"][doc0] == []
+
+            # We should also discover the dependencies after committing
+            git.commit("Initial commit")
+            run_and_check_config(config)

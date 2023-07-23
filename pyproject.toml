@@ -71,3 +71,6 @@ target-version = "py39"
 select = ["F", "I", "E", "W", "YTT", "B", "Q", "PLE", "PLR", "PLW"]
 ignore = ["PLR0913"]
 exclude = []
+
+[tool.ruff.isort]
+known-first-party = ["showyourwork2"]

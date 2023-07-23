@@ -36,15 +36,27 @@ def get_repo_tag() -> Optional[str]:
     return None
 
 
-@lru_cache
 def list_files() -> List[str]:
+    files: List[str] = []
+    ok = False
+
     # List all files tracked at HEAD
-    r = git(["ls-tree", "-r", "HEAD", "--name-only"])
-    files: List[str] = list(r.stdout.splitlines())
+    r = git(["ls-tree", "-r", "HEAD", "--name-only"], check=False)
+    if r.returncode == 0:
+        ok = True
+        files += list(r.stdout.splitlines())
 
     # Also list the staged files
-    r = git(["diff", "--name-only", "--relative", "--cached"])
-    files += list(r.stdout.splitlines())
+    r = git(["diff", "--name-only", "--relative", "--cached"], check=False)
+    if r.returncode == 0:
+        ok = True
+        files += list(r.stdout.splitlines())
+
+    if not ok:
+        raise RuntimeError(
+            "Could not list files tracked by git; "
+            "are you sure you're in a git repository?"
+        )
 
     return list(sorted(set(files)))
 
