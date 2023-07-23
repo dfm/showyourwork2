@@ -4,6 +4,7 @@ from tempfile import TemporaryDirectory
 from typing import Generator
 
 import pytest
+
 from showyourwork2.config.config import (
     ConfigVersionError,
     ValidationError,

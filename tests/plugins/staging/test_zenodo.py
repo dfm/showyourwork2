@@ -2,6 +2,7 @@ import os
 from typing import Generator
 
 import pytest
+
 from showyourwork2.plugins.staging.zenodo_mock import ZenodoMock
 from showyourwork2.testing import run_snakemake
 
