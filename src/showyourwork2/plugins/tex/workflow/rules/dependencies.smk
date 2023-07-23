@@ -58,7 +58,7 @@ for doc, explicit_deps in SYW__DOCUMENTS.items():
             SYW__WORK_PATHS.dependencies_for(doc)
         run:
             base_path = Path(doc).parent
-            parse_dependencies(input[0], output[0], base_path)
+            parse_dependencies(input[0], output[0], base_path, SYW__REPO_PATHS.root)
 
 rule:
     """

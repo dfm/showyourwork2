@@ -12,11 +12,13 @@ from tempfile import TemporaryDirectory as _TemporaryDirectory
 from typing import Any, Generator, Iterable, List, Optional, Union
 
 from showyourwork2 import cli
+from showyourwork2.git import commit as git_commit
+from showyourwork2.git import git
 from showyourwork2.paths import PathLike, find_project_root
 
 # We put all the conda environments in a single directory so that we can reuse
 # them between tests
-conda_prefix = str(Path().resolve() / ".test" / "conda")
+CONDA_PREFIX = str(Path().resolve() / ".test" / "conda")
 
 
 @contextmanager
@@ -57,6 +59,12 @@ class TemporaryDirectory:
         else:
             self.tempdir.cleanup()
 
+    def __enter__(self) -> Path:
+        return self.name
+
+    def __exit__(self, *_: Any) -> None:
+        self.cleanup()
+
 
 class run:
     def __init__(
@@ -68,6 +76,7 @@ class run:
         show_diff: bool = False,
         diff_command: Union[str, Iterable[str]] = ("diff", "-u"),
         expected_dirname: PathLike = "expected",
+        git_init: bool = False,
         **kwargs: Any,
     ):
         self._directory = TemporaryDirectory(path, args)
@@ -87,6 +96,12 @@ class run:
             test_project_root, tmpdir, ignore=ignore_expected, dirs_exist_ok=True
         )
         with cwd(tmpdir):
+            if git_init:
+                git(["init", "."])
+                git(["add", "."])
+                git_commit("initial commit")
+
+            # Execute the command implemented by subclasses
             self.execute(
                 *args,
                 cwd=tmpdir,
@@ -189,6 +204,7 @@ class run_snakemake(run):
         show_diff: bool = False,
         diff_command: Union[str, Iterable[str]] = ("diff", "-u"),
         expected_dirname: PathLike = "expected",
+        git_init: bool = False,
         conda_frontend: str = "mamba",
         **kwargs: Any,
     ):
@@ -201,7 +217,7 @@ class run_snakemake(run):
                 "--conda-frontend",
                 conda_frontend,
                 "--conda-prefix",
-                conda_prefix,
+                CONDA_PREFIX,
             ]
             + list(args)
         )
@@ -213,6 +229,7 @@ class run_snakemake(run):
             show_diff=show_diff,
             diff_command=diff_command,
             expected_dirname=expected_dirname,
+            git_init=git_init,
             **kwargs,
         )
 
@@ -227,10 +244,13 @@ class run_showyourwork(run):
         show_diff: bool = False,
         diff_command: Union[str, Iterable[str]] = ("diff", "-u"),
         expected_dirname: PathLike = "expected",
+        git_init: bool = False,
         configfile: Optional[PathLike] = None,
         cores: str = "1",
         conda_frontend: Optional[str] = "mamba",
+        conda_prefix: Optional[str] = CONDA_PREFIX,
     ):
+        self.conda_prefix = conda_prefix
         super().__init__(
             path,
             *args,
@@ -239,6 +259,7 @@ class run_showyourwork(run):
             show_diff=show_diff,
             diff_command=diff_command,
             expected_dirname=expected_dirname,
+            git_init=git_init,
             configfile=configfile,
             cores=cores,
             conda_frontend=conda_frontend,
@@ -249,7 +270,7 @@ class run_showyourwork(run):
         find_project_root.cache_clear()
         cli._build(
             verbose=False,
-            snakemake_args=args,
+            snakemake_args=list(args) + ["--conda-prefix", self.conda_prefix],
             **kwargs,
         )
 

@@ -1,6 +1,7 @@
 import platform
 
 import pytest
+
 from showyourwork2.testing import run_showyourwork
 
 

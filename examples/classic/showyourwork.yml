@@ -1,0 +1,4 @@
+config-version: 2
+conda: environment.yml
+plugins:
+  - showyourwork2.plugins.vcs

@@ -1,11 +1,12 @@
-from importlib.resources import files
+import importlib
+from pathlib import Path
 from typing import Any, Dict, List
 
 import yaml
 from jsonschema import ValidationError as JSONSchemaValidationError
-from jsonschema import validate
+from jsonschema import validate, validators
 
-from showyourwork2.paths import PathLike
+from showyourwork2.paths import PathLike, package_data
 from showyourwork2.version import __version__
 
 
@@ -42,8 +43,8 @@ def normalize_keys(config: Any) -> Any:
     if isinstance(config, dict):
         result = {}
         for k, v in config.items():
-            v = normalize_keys(v)
-            result[k.replace("-", "_")] = v
+            value = normalize_keys(v)
+            result[k.replace("-", "_")] = value
         return result
     elif isinstance(config, list):
         return [normalize_keys(v) for v in config]
@@ -58,29 +59,38 @@ def parse_config(config: Dict[str, Any], required_version: int = 2) -> Dict[str,
     if config.get("config_version", None) != required_version:
         raise ConfigVersionError(config, required_version=required_version)
 
-    # Validate the config against the schema
-    with files("showyourwork2.config").joinpath("config.schema.yaml").open("r") as f:
+    # Load the schema to be used for validation
+    with open(package_data("showyourwork2.config", "config.schema.yaml"), "r") as f:
         schema = yaml.safe_load(f)
+
+    # Extract the plugins and add the default TeX plugin if required
+    plugins = config.get("plugins", ["showyourwork2.plugins.tex"])
+    if "showyourwork2.plugins.tex" not in plugins and not config.get("notex", False):
+        plugins = ["showyourwork2.plugins.tex"] + list(plugins)
+    config["plugins"] = plugins
+
+    # Loop over the plugins and parse their configs
+    for plugin in plugins:
+        mod = importlib.import_module(plugin)
+        if hasattr(mod, "preprocess_config"):
+            # The configuration and schema are modified in-place
+            mod.preprocess_config(config, schema)
+
+    # Validate the config against the schema
     try:
-        validate(config, schema)
+        validate(config, schema, CustomSchemaValidator)
     except JSONSchemaValidationError as e:
         raise ValidationError(
             "The configuration file is invalid; schema validation failed with the "
             f"following error:\n\n{e}"
         ) from e
 
-    # Default to using the tex plugin
-    plugins = config.get("plugins", ["showyourwork2.plugins.tex"])
-    if "showyourwork2.plugins.tex" not in plugins and not config.get("notex", False):
-        plugins = ["showyourwork2.plugins.tex"] + list(plugins)
-    config["plugins"] = plugins
-
     # Extract the list of documents and their dependencies and fill it out. The
     # resulting 'documents' config item is keyed by document path and has a list
     # of dependencies, including the global dependencies defined in
     # 'document_dependencies' and the per-document dependencies.
-    document_dependencies = list(config.get("document_dependencies", []))
-    input_documents = config.get("documents", ["ms.tex"])
+    document_dependencies: List[str] = list(config.get("document_dependencies", []))
+    input_documents = config.get("documents", [])
     documents: Dict[str, List[str]] = {}
     for doc in input_documents:
         if isinstance(doc, str):
@@ -92,4 +102,28 @@ def parse_config(config: Dict[str, Any], required_version: int = 2) -> Dict[str,
     config["document_dependencies"] = document_dependencies
     config["documents"] = documents
 
+    # Loop over the plugins and execute their config post-processing hook
+    for plugin in plugins:
+        mod = importlib.import_module(plugin)
+        if hasattr(mod, "postprocess_config"):
+            # The configuration is modified in-place
+            mod.postprocess_config(config)
+
     return config
+
+
+# Construct a custom JSON schema validator to optionally allow Path objects
+# wherever "string" is expected
+def _is_string_or_path(checker: Any, value: Any) -> bool:
+    del checker
+    return validators.Draft202012Validator.TYPE_CHECKER.is_type(
+        value, "string"
+    ) or isinstance(value, Path)
+
+
+type_checker = validators.Draft202012Validator.TYPE_CHECKER.redefine(
+    "string", _is_string_or_path
+)
+CustomSchemaValidator = validators.extend(
+    validators.Draft202012Validator, type_checker=type_checker
+)

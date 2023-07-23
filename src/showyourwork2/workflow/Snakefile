@@ -20,9 +20,16 @@ SYW__DOCUMENTS = config["documents"]
 SYW__REPO_PATHS = paths.repo(config)
 SYW__WORK_PATHS = paths.work(config)
 
+# This is used for printing the list of artifact names
+_list_artifacts = ", ".join(map("'{}'".format, config.get("artifacts", [])))
+
 rule all:
+    message:
+        f"Generating artifacts: {_list_artifacts}"
     input:
-        [Path(doc).with_suffix(".pdf") for doc in SYW__DOCUMENTS]
+        config.get("artifacts", [])
+
+del _list_artifacts
 
 rule:
     name:
@@ -32,7 +39,7 @@ rule:
     run:
         import json
         with open(output[0], "w") as f:
-            json.dump(config, f, indent=2)
+            utils.json_dump(config, f)
 
 # Include the rules from the main showyourwork workflow
 include_rules = partial(package_data, "showyourwork2", "workflow", "rules")

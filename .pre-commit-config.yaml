@@ -12,11 +12,12 @@ repos:
     hooks:
       - id: black-jupyter
         exclude: "^tests/projects/"
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.0.245"
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.0.277"
     hooks:
       - id: ruff
         exclude: "^docs/|^tests/projects/"
+        args: [--fix, --exit-non-zero-on-fix]
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: "v1.0.0"
     hooks:

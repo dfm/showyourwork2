@@ -1,6 +1,7 @@
+import json
 import shutil
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from showyourwork2.paths import PathLike, path_to_rule_name
 
@@ -32,3 +33,17 @@ def rule_name(
         suffix = f"__{path_to_rule_name(document)}"
 
     return f"{prefix}__{'_'.join(parts)}{suffix}"
+
+
+class PathEncoder(json.JSONEncoder):
+    def default(self, obj: Any) -> str:
+        if isinstance(obj, Path):
+            return str(obj)
+        return super().default(obj)
+
+
+def json_dump(obj: Any, fp: Any, **kwargs: Any) -> None:
+    kwargs["sort_keys"] = kwargs.get("sort_keys", True)
+    kwargs["indent"] = kwargs.get("indent", 2)
+    kwargs["cls"] = kwargs.get("cls", PathEncoder)
+    json.dump(obj, fp, **kwargs)

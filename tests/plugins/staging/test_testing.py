@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List
 
 import pytest
+
 from showyourwork2.testing import TemporaryDirectory, run_snakemake
 
 

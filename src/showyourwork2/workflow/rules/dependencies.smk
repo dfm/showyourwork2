@@ -1,3 +1,4 @@
+import json
 import inspect
 from showyourwork2.dependencies import simplify_dependency_tree
 
@@ -107,8 +108,7 @@ rule:
         SYW__WORK_PATHS.root / "dependency_tree.json",
         SYW__WORK_PATHS.root / "dependency_tree_simple.json"
     run:
-        import json
         with open(output[0], "w") as f:
-            json.dump(config["_dependency_tree"], f, indent=2)
+            utils.json_dump(config["_dependency_tree"], f, indent=2)
         with open(output[1], "w") as f:
-            json.dump(config["_dependency_tree_simple"], f, indent=2)
+            utils.json_dump(config["_dependency_tree_simple"], f, indent=2)

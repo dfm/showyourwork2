@@ -1,5 +1,3 @@
-import json
-
 SUPPORTED_FIGURE_EXTENSIONS = [".pdf", ".png", ".jpg", ".jpeg", ".eps", ".svg"]
 dag_directory = SYW__WORK_PATHS / "dag"
 dag_filename = config.get("dag", {}).get("render_to", "dag.pdf")
@@ -14,7 +12,7 @@ rule:
         dag_directory / "_render_dag_config.json"
     run:
         with open(output[0], "w") as f:
-            json.dump(config, f)
+            utils.json_dump(config, f)
 
 def generated_files(*_):
     deps = []
