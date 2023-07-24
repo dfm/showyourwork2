@@ -47,7 +47,6 @@ include: include_rules("main.smk")
 include: include_rules("dependencies.smk")
 include: include_rules("static.smk")
 include: include_rules("dynamic.smk")
-include: include_rules("render.smk")
 include: include_rules("plugins.smk")
 
 # Include the rules from any user-defined local Snakefiles
