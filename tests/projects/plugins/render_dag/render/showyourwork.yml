@@ -1,0 +1,10 @@
+config-version: 2
+
+plugins:
+  - showyourwork2.plugins.render_dag
+
+conda: environment.yml
+
+dynamic:
+  - script: generate_figure.py
+    output: figure.pdf

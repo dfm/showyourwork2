@@ -1,0 +1,5 @@
+type: object
+properties:
+  output:
+    description: "The path to the output file."
+    type: string
