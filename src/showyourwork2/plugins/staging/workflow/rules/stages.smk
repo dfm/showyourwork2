@@ -1,6 +1,3 @@
-from pathlib import Path
-from showyourwork2 import utils
-from showyourwork2.plugins.staging import stages
 from showyourwork2.plugins.staging.config import _CONFIG
 
 previously_included = set()

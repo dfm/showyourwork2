@@ -1,4 +1,4 @@
-from showyourwork2.plugins.staging import stages, zenodo
+from showyourwork2.plugins.staging import zenodo
 
 for name, stage in stages.STAGES.items():
     if not isinstance(stage, zenodo.ZenodoStage):
