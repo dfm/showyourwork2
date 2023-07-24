@@ -1,7 +1,0 @@
-config-version: 2
-
-conda: environment.yml
-
-dynamic:
-  - script: generate_figure.py
-    output: figure.pdf
