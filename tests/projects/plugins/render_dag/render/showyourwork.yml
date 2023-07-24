@@ -1,5 +1,8 @@
 config-version: 2
 
+plugins:
+  - showyourwork2.plugins.render_dag
+
 conda: environment.yml
 
 dynamic:
