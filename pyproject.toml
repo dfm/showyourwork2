@@ -22,6 +22,7 @@ dependencies = [
     "snakemake>=7.15.2", # TODO(dfm): figure out what minimum version we _actually_ need
     "click",
     "ensureconda",
+    "Jinja2",
 ]
 
 [project.scripts]

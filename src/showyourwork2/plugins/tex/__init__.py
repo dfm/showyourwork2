@@ -5,6 +5,7 @@ import yaml
 
 from showyourwork2.logging import get_logger
 from showyourwork2.paths import package_data
+from showyourwork2.plugins.tex import themes as themes
 
 
 def snakefiles() -> List[Path]:
@@ -16,7 +17,7 @@ def preprocess_config(config: Dict[str, Any], schema: Dict[str, Any]) -> None:
     with open(
         package_data("showyourwork2.plugins.tex", "config.schema.yaml"), "r"
     ) as f:
-        schema["tex"] = yaml.safe_load(f)
+        schema["properties"]["tex"] = yaml.safe_load(f)
 
     # Set the plugin-specific configuration variables
     tex_config = config.get("tex", {})

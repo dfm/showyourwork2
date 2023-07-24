@@ -2,6 +2,7 @@ $schema: "https://json-schema.org/draft/2020-12/schema"
 title: "showyourwork configuration"
 description: "The schema for version 2 of the showyourwork configuration file"
 type: object
+additionalProperties: false
 
 required:
   - config_version

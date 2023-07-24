@@ -1,5 +1,49 @@
+description: "Configuration for the showyourwork TeX plugin"
 type: object
 properties:
   synctex:
     description: "Enable synctex support"
     type: boolean
+
+  theme:
+    oneOf:
+      - type: string
+        description: "The name of a built-in TeX theme"
+      - type: object
+        description: "Specification for a TeX theme"
+        oneOf:
+          - required:
+              - name
+            properties:
+              name:
+                type: string
+                description: "The name of a built-in TeX theme"
+          - required:
+              - path
+            properties:
+              path:
+                type: string
+                description: "The path to a local theme, relative to the project root"
+      - type: array
+        description: "A list of theme specifications for each document"
+        items:
+          type: object
+          required:
+            - document
+          properties:
+            document:
+              type: string
+              description: "The document name"
+            theme:
+              anyOf:
+                - type: string
+                  description: "The name of a built-in TeX theme"
+                - type: object
+                  description: "Specification for a TeX theme"
+                  properties:
+                    name:
+                      type: string
+                      description: "The name of a built-in TeX theme"
+                    path:
+                      type: string
+                      description: "The path to a local theme, relative to the project root"

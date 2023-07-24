@@ -48,12 +48,19 @@ for base_path in [SYW__WORK_PATHS / "dependencies", SYW__WORK_PATHS / "build"]:
                 """
                 name:
                     sywplug_tex__rule_name("style", slug, document=doc)
-                input:
-                    sywplug_tex__resource("resources", f"{slug}.tex")
                 output:
                     base_path / doc_dir / "showyourwork.tex"
+                params:
+                    slug=slug,
+                    config=config,
                 run:
-                    utils.copy_file_or_directory(input[0], output[0])
+                    from showyourwork2.plugins.tex.theme import render_style_file
+
+                    render_style_file(
+                        template_name=f"{params.slug}.tex",
+                        target_file=output[0],
+                        config=params.config,
+                    )
 
             rule:
                 """

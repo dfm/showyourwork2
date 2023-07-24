@@ -64,6 +64,30 @@ conda: 1
             load_config(f)
 
 
+def test_invalid_nested_schema() -> None:
+    with temp_config_file(
+        """
+config-version: 2
+documents:
+    - path: "test"
+      dependencies: 1
+"""
+    ) as f:
+        with pytest.raises(ValidationError):
+            load_config(f)
+
+
+def test_invalid_property() -> None:
+    with temp_config_file(
+        """
+config-version: 2
+not-allowed: "test"
+"""
+    ) as f:
+        with pytest.raises(ValidationError):
+            load_config(f)
+
+
 def test_document() -> None:
     with temp_config_file(
         """
