@@ -17,7 +17,11 @@ def preprocess_config(config: Dict[str, Any], schema: Dict[str, Any]) -> None:
     with open(
         package_data("showyourwork2.plugins.tex", "config.schema.yaml"), "r"
     ) as f:
-        schema["properties"]["tex"] = yaml.safe_load(f)
+        data = yaml.safe_load(f)
+        defs = schema.get("$defs", {})
+        defs.update(data.pop("$defs", {}))
+        schema["$defs"] = defs
+        schema["properties"]["tex"] = data
 
     # Set the plugin-specific configuration variables
     tex_config = config.get("tex", {})
