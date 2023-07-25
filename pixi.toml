@@ -1,0 +1,31 @@
+[project]
+name = "showyourwork2"
+version = "0.1.0"
+description = "A workflow for open-source scientific articles"
+authors = [
+    "Rodrigo Luger <rodluger@gmail.com>",
+    "Dan Foreman-Mackey <foreman.mackey@gmail.com>",
+]
+channels = ["conda-forge", "bioconda"]
+platforms = [
+    "linux-64",
+    "linux-aarch64",
+    "linux-ppc64le",
+    "osx-64",
+    "osx-arm64",
+    # "win-64",
+]
+
+[tasks]
+build = "python -m pip install -vv ."
+showyourwork2 = { depends_on = ["build"], cmd = "showyourwork2" }
+
+[dependencies]
+python = ">=3.9"
+snakemake = ">=7.15.2"
+requests = "*"
+pyyaml = "*"
+jsonschema = "*"
+ensureconda = "*"
+click = "*"
+pip = "*"
