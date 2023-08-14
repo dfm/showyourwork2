@@ -49,7 +49,6 @@ def ensure_all_document_dependencies(*_):
     dag = None
     for level in inspect.stack():
         dag = level.frame.f_locals.get("dag", None)
-        print("*** DAG ***: ", dag)
         if dag is not None:
             break
 

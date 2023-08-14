@@ -33,7 +33,6 @@ def snakemake_session(
 
 @snakemake_session
 def tests(session: nox.Session) -> None:
-    session.log(session.posargs)
     session.install(".[test]")
     args = session.posargs
     if not args:
