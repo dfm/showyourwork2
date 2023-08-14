@@ -1,5 +1,6 @@
 description: "Configuration for the showyourwork TeX plugin"
 type: object
+additionalProperties: false
 properties:
   synctex:
     description: "Enable synctex support"

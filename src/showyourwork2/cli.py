@@ -168,8 +168,6 @@ def get_config_file_and_project_root(
         cwd = paths.find_project_root(*target_paths)
         config_file = cwd / "showyourwork.yml"
         if not config_file.is_file():
-            config_file = cwd / "showyourwork.yaml"
-        if not config_file.is_file():
             raise RuntimeError(
                 f"No config file found in project root ({cwd}). "
                 "Please specify a configuration file using the '--configfile' command "

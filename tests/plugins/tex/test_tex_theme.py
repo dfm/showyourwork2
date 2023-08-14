@@ -3,6 +3,8 @@ from typing import Any
 import pytest
 
 from showyourwork2.config import ValidationError, parse_config
+from showyourwork2.paths import package_data
+from showyourwork2.plugins.tex.theme import Theme
 
 
 @pytest.mark.parametrize(
@@ -40,3 +42,41 @@ def test_tex_invalid_theme_config(theme: Any) -> None:
                 "tex": {"theme": theme},
             }
         )
+
+
+@pytest.mark.parametrize(
+    "spec",
+    [
+        "base",
+        {"name": "base"},
+        {"path": str(package_data("showyourwork2.plugins.tex", "themes/base"))},
+    ],
+)
+def test_base_theme(spec: Any) -> None:
+    theme = Theme(spec)
+    assert len(theme._hierarchy) == 1
+    assert theme._hierarchy[0] == theme.path
+    assert theme.resources_for_template("dependencies") == {}
+    assert theme.resources_for_template("build") == {}
+    theme.render("dependencies.tex", {})
+    theme.render("build.tex", {})
+
+
+@pytest.mark.parametrize(
+    "spec",
+    [
+        "classic",
+        {"name": "classic"},
+        {"path": str(package_data("showyourwork2.plugins.tex", "themes/classic"))},
+    ],
+)
+def test_classic_theme(spec: Any) -> None:
+    theme = Theme(spec)
+    print(theme._hierarchy)
+    assert len(theme._hierarchy) == 2  # noqa: PLR2004
+    assert theme._hierarchy[0] == theme.path
+    assert theme._hierarchy[1].name == "base"
+    assert theme.resources_for_template("dependencies") == {}
+    assert theme.resources_for_template("build") != {}
+    theme.render("dependencies.tex", {})
+    theme.render("build.tex", {})

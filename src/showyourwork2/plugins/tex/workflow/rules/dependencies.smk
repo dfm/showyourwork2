@@ -56,9 +56,13 @@ for doc, explicit_deps in SYW__DOCUMENTS.items():
             xml
         output:
             SYW__WORK_PATHS.dependencies_for(doc)
+        params:
+            config=config
         run:
             base_path = Path(doc).parent
-            parse_dependencies(input[0], output[0], base_path, SYW__REPO_PATHS.root)
+            parse_dependencies(
+                input[0], output[0], base_path, SYW__REPO_PATHS.root, params.config
+            )
 
 rule:
     """

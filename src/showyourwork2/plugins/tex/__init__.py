@@ -14,9 +14,7 @@ def snakefiles() -> List[Path]:
 
 def preprocess_config(config: Dict[str, Any], schema: Dict[str, Any]) -> None:
     # Load the schema to be used for validation of these plugin-specific options
-    with open(
-        package_data("showyourwork2.plugins.tex", "config.schema.yaml"), "r"
-    ) as f:
+    with open(package_data("showyourwork2.plugins.tex", "config.schema.yml"), "r") as f:
         data = yaml.safe_load(f)
         defs = schema.get("$defs", {})
         defs.update(data.pop("$defs", {}))
@@ -36,7 +34,9 @@ def preprocess_config(config: Dict[str, Any], schema: Dict[str, Any]) -> None:
         if d in document_names:
             continue
         if Path(d).is_file():
-            get_logger().debug(f"Found default document {d}; adding to document list")
+            get_logger(config).debug(
+                f"Found default document {d}; adding to document list"
+            )
             documents.append(d)
     config["documents"] = documents
 

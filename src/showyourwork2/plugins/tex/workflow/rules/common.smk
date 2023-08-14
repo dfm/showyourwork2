@@ -1,3 +1,5 @@
+from showyourwork2.plugins.tex.theme import get_theme_for_document
+
 sywplug_tex__rule_name = partial(
     utils.rule_name, plugin="showyourwork2.plugins.tex"
 )
@@ -35,6 +37,7 @@ for base_path in [SYW__WORK_PATHS / "dependencies", SYW__WORK_PATHS / "build"]:
     style_paths = set()
     for doc in SYW__DOCUMENTS:
         doc_dir = Path(doc).parent
+        theme = get_theme_for_document(config, doc)
 
         # If multiple documents live within the same directory, we only want to copy
         # the style files once.
