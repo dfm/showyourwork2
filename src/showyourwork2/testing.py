@@ -9,7 +9,7 @@ import weakref
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory as _TemporaryDirectory
-from typing import Any, Generator, Iterable, List, Optional, Union
+from typing import Any, Callable, Generator, Iterable, List, Optional, Union
 
 from showyourwork2 import cli
 from showyourwork2.git import commit as git_commit
@@ -66,8 +66,25 @@ class TemporaryDirectory:
         self.cleanup()
 
 
+def git_copytree(
+    src: PathLike,
+    dst: PathLike,
+    ignore: Callable[[str, List[str]], Iterable[str]],
+) -> None:
+    files = git(["ls-files", str(src)]).stdout.strip().splitlines()
+    files = [str(Path(f).resolve().relative_to(src)) for f in files]
+    to_ignore = set(ignore(str(src), files))
+    for file in files:
+        if file in to_ignore:
+            continue
+        from_ = Path(src) / file
+        to = Path(dst) / file
+        to.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(from_, to)
+
+
 class run:
-    def __init__(
+    def __init__(  # noqa: PLR0912
         self,
         path: PathLike,
         *args: str,
@@ -77,6 +94,7 @@ class run:
         diff_command: Union[str, Iterable[str]] = ("diff", "-u"),
         expected_dirname: PathLike = "expected",
         git_init: bool = False,
+        copy_using_git: bool = True,
         **kwargs: Any,
     ):
         self._directory = TemporaryDirectory(path, args)
@@ -91,10 +109,14 @@ class run:
                 name for name in names if Path(name).parts[0].startswith("expected")
             ]
 
-        # Copy the test project over to a temporary directory
-        shutil.copytree(
-            test_project_root, tmpdir, ignore=ignore_expected, dirs_exist_ok=True
-        )
+        # If requested (default), only copy files tracked by git
+        if copy_using_git:
+            git_copytree(test_project_root, tmpdir, ignore_expected)
+        else:
+            shutil.copytree(
+                test_project_root, tmpdir, ignore=ignore_expected, dirs_exist_ok=True
+            )
+
         with cwd(tmpdir):
             if git_init:
                 git(["init", "."])
@@ -205,6 +227,7 @@ class run_snakemake(run):
         diff_command: Union[str, Iterable[str]] = ("diff", "-u"),
         expected_dirname: PathLike = "expected",
         git_init: bool = False,
+        copy_using_git: bool = True,
         conda_frontend: str = "mamba",
         **kwargs: Any,
     ):
@@ -230,6 +253,7 @@ class run_snakemake(run):
             diff_command=diff_command,
             expected_dirname=expected_dirname,
             git_init=git_init,
+            copy_using_git=copy_using_git,
             **kwargs,
         )
 
@@ -245,6 +269,7 @@ class run_showyourwork(run):
         diff_command: Union[str, Iterable[str]] = ("diff", "-u"),
         expected_dirname: PathLike = "expected",
         git_init: bool = False,
+        copy_using_git: bool = True,
         configfile: Optional[PathLike] = None,
         cores: str = "1",
         conda_frontend: Optional[str] = "mamba",
@@ -260,6 +285,7 @@ class run_showyourwork(run):
             diff_command=diff_command,
             expected_dirname=expected_dirname,
             git_init=git_init,
+            copy_using_git=copy_using_git,
             configfile=configfile,
             cores=cores,
             conda_frontend=conda_frontend,

@@ -31,7 +31,7 @@ fix_rule_order(config, workflow)
             # If no prefix is used then snakemake should fail since the rule
             # order is ambiguous.
             with pytest.raises(RuntimeError):
-                run_snakemake(root, "a.txt")
+                run_snakemake(root, "a.txt", copy_using_git=False)
         else:
-            with run_snakemake(root, "a.txt") as result:
+            with run_snakemake(root, "a.txt", copy_using_git=False) as result:
                 assert (result / "a.txt").read_text().strip() == "a"

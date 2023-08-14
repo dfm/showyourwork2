@@ -2,6 +2,8 @@ import json
 import inspect
 from showyourwork2.dependencies import simplify_dependency_tree
 
+SYW__DAG_FLAG = SYW__WORK_PATHS.flag("dag")
+
 def get_document_dependencies(doc):
     checkpoint_name = utils.rule_name(
         "check", "dependencies", document=doc
@@ -94,7 +96,7 @@ rule:
     input:
         [get_document_dependencies(doc) for doc in SYW__DOCUMENTS]
     output:
-        touch(SYW__WORK_PATHS.flag("dag"))
+        touch(SYW__DAG_FLAG)
 
 rule:
     name:
@@ -102,7 +104,7 @@ rule:
     message:
         "Saving document dependency tree as JSON"
     input:
-        rules.syw__dag.output,
+        SYW__DAG_FLAG,
         ensure_all_document_dependencies
     output:
         SYW__WORK_PATHS.root / "dependency_tree.json",
