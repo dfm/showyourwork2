@@ -41,8 +41,8 @@ jobs:
             nox-session: "tests(python='3.11', snakemake='latest')"
 
           # TODO(dfm): Test on Windows - there are currently many failures
-          # - platform: windows-latest
-          #   nox-session: "tests(python='3.11', snakemake='latest')"
+          - platform: windows-latest
+            nox-session: "tests(python='3.11', snakemake='latest')"
 
     runs-on: ${{ matrix.platform }}
     steps:

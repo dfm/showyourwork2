@@ -33,10 +33,11 @@ def snakemake_session(
 
 @snakemake_session
 def tests(session: nox.Session) -> None:
+    session.log(session.posargs)
     session.install(".[test]")
-    args = tuple(*session.posargs)
+    args = session.posargs
     if not args:
-        args = ("-v", "--durations=5")
+        args = ["-v", "--durations=5"]
     session.run("pytest", *args)
 
 
