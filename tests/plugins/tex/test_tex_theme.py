@@ -72,7 +72,6 @@ def test_base_theme(spec: Any) -> None:
 )
 def test_classic_theme(spec: Any) -> None:
     theme = Theme(spec)
-    print(theme._hierarchy)
     assert len(theme._hierarchy) == 2  # noqa: PLR2004
     assert theme._hierarchy[0] == theme.path
     assert theme._hierarchy[1].name == "base"
