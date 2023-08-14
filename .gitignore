@@ -20,3 +20,4 @@ junit
 *.pdf
 *.synctex.gz
 .*_cache
+pixi.lock
