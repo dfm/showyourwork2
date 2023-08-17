@@ -60,7 +60,7 @@ def parse_config(config: Dict[str, Any], required_version: int = 2) -> Dict[str,
         raise ConfigVersionError(config, required_version=required_version)
 
     # Load the schema to be used for validation
-    with open(package_data("showyourwork2.config", "config.schema.yaml"), "r") as f:
+    with open(package_data("showyourwork2.config", "config.schema.yml"), "r") as f:
         schema = yaml.safe_load(f)
 
     # Extract the plugins and add the default TeX plugin if required

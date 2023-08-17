@@ -1,3 +1,6 @@
+from showyourwork2.plugins.tex.theme import get_theme_for_document
+from showyourwork2.paths import path_to_rule_name
+
 sywplug_tex__rule_name = partial(
     utils.rule_name, plugin="showyourwork2.plugins.tex"
 )
@@ -19,69 +22,100 @@ def sywplug_tex__local_or_provided_style(document):
 for base_path in [SYW__WORK_PATHS / "dependencies", SYW__WORK_PATHS / "build"]:
     slug = base_path.name
 
-    rule:
-        """
-        Copy explicit dependencies to the working directory.
-        """
-        name:
-            sywplug_tex__rule_name("copy", "dependencies", "to", slug)
-        input:
-            "{file}"
-        output:
-            base_path / "{file}"
-        run:
-            utils.copy_file_or_directory(input[0], output[0])
-
-    style_paths = set()
     for doc in SYW__DOCUMENTS:
         doc_dir = Path(doc).parent
+        work_dir = base_path / doc
 
-        # If multiple documents live within the same directory, we only want to copy
-        # the style files once.
-        if str(doc_dir) not in style_paths:
-            style_paths.add(str(doc_dir))
+        # Work out the theme resources
+        theme = get_theme_for_document(config, doc)
+        theme_resources = theme.resources_for_template(slug)
 
+        rule:
+            """
+            Copy explicit dependencies to the working directory.
+            """
+            name:
+                sywplug_tex__rule_name("copy", "dependencies", "to", slug, document=doc)
+            input:
+                "{file}"
+            output:
+                work_dir / "{file}"
+            run:
+                utils.copy_file_or_directory(input[0], output[0])
+
+        for resource_out, resource_in in theme_resources.items():
             rule:
                 """
-                Copy the appropriate ``showyourwork`` style file to the work
-                directory.
+                Copy theme resources to the working directory.
                 """
                 name:
-                    sywplug_tex__rule_name("style", slug, document=doc)
+                    sywplug_tex__rule_name("copy", "resources", "for", slug, path_to_rule_name(resource_in), document=doc)
                 input:
-                    sywplug_tex__resource("resources", f"{slug}.tex")
+                    resource_in
                 output:
-                    base_path / doc_dir / "showyourwork.tex"
-                run:
-                    utils.copy_file_or_directory(input[0], output[0])
-
-            rule:
-                """
-                Copy the ``showyourwork`` class file to the work directory. If
-                the project contains a ``showyourwork.sty`` file in the same
-                directory as the document, we use that instead of the standard
-                one provided by showyourwork, allowing users to customize
-                behavior.
-                """
-                name:
-                    sywplug_tex__rule_name("class", slug, document=doc)
-                input:
-                    sywplug_tex__local_or_provided_style(doc)
-                output:
-                    base_path / doc_dir / "showyourwork.sty"
+                    work_dir / doc_dir / resource_out
                 run:
                     utils.copy_file_or_directory(input[0], output[0])
 
         rule:
             """
-            Copy the document from the parent work directory to the dependencies
-            work directory.
+            Copy the appropriate ``showyourwork`` style file to the work
+            directory.
+            """
+            name:
+                sywplug_tex__rule_name("style", slug, document=doc)
+            input:
+                [work_dir / doc_dir / f for f in theme_resources.keys()],
+                dependencies_file=SYW__WORK_PATHS.dependencies_for(doc) if slug == "build" else [],
+            output:
+                work_dir / doc_dir / "showyourwork.tex"
+            params:
+                slug=slug,
+                config=config,
+                doc=doc,
+            run:
+                import json
+                if input.dependencies_file:
+                    with open(input.dependencies_file) as f:
+                        dependencies = json.load(f)
+                else:
+                    dependencies = None
+
+                theme = get_theme_for_document(params.config, params.doc)
+                theme.render_to(
+                    template_name=f"{params.slug}.tex",
+                    target_file=output[0],
+                    config=params.config,
+                    dependencies=dependencies,
+                )
+
+        rule:
+            """
+            Copy the ``showyourwork`` class file to the work directory. If
+            the project contains a ``showyourwork.sty`` file in the same
+            directory as the document, we use that instead of the standard
+            one provided by showyourwork, allowing users to customize
+            behavior.
+            """
+            name:
+                sywplug_tex__rule_name("class", slug, document=doc)
+            input:
+                sywplug_tex__local_or_provided_style(doc)
+            output:
+                work_dir / doc_dir / "showyourwork.sty"
+            run:
+                utils.copy_file_or_directory(input[0], output[0])
+
+        rule:
+            """
+            Copy the document from the top level working directory to the
+            current working directory.
             """
             name:
                 sywplug_tex__rule_name("doc", slug, document=doc)
             input:
                 SYW__WORK_PATHS.root / doc
             output:
-                base_path / doc
+                work_dir / doc
             run:
                 utils.copy_file_or_directory(input[0], output[0])

@@ -32,8 +32,6 @@ def find_project_root(*input_paths: PathLike) -> Path:
             return directory
         if (directory / "showyourwork.yml").is_file():
             return directory
-        if (directory / "showyourwork.yaml").is_file():
-            return directory
 
     raise RuntimeError(
         "Could not find project root; are you sure that you're calling showyourwork "

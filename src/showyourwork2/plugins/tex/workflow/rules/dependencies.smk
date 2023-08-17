@@ -10,13 +10,12 @@ structure. Of note, this procedure depends on the TeX documents including the
 
 from showyourwork2.plugins.tex.dependencies import parse_dependencies
 
-deps_dir = SYW__WORK_PATHS / "dependencies"
-
 # We only define these rules for documents explicitly listed in the config file
 # because we otherwise end up with ambigious rules for other TeX files. So here
 # we're looping over all the document paths.
 for doc, explicit_deps in SYW__DOCUMENTS.items():
     doc_dir = Path(doc).parent
+    deps_dir = SYW__WORK_PATHS / "dependencies" / doc
     xml =  deps_dir / doc_dir / f"{Path(doc).with_suffix('').name}.dependencies.xml"
 
     rule:
@@ -56,9 +55,13 @@ for doc, explicit_deps in SYW__DOCUMENTS.items():
             xml
         output:
             SYW__WORK_PATHS.dependencies_for(doc)
+        params:
+            config=config
         run:
             base_path = Path(doc).parent
-            parse_dependencies(input[0], output[0], base_path, SYW__REPO_PATHS.root)
+            parse_dependencies(
+                input[0], output[0], base_path, SYW__REPO_PATHS.root, params.config
+            )
 
 rule:
     """

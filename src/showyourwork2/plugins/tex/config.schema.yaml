@@ -1,5 +1,0 @@
-type: object
-properties:
-  synctex:
-    description: "Enable synctex support"
-    type: boolean

@@ -1,9 +1,7 @@
-from showyourwork2.plugins.tex.synctex import fix_synctex_paths
-
-build_dir = SYW__WORK_PATHS.build
 enable_synctex = config.get("tex", {}).get("synctex", True)
 
 def _build_dependendencies_for(doc):
+    build_dir = SYW__WORK_PATHS.build / doc
     deps_func = get_document_dependencies(doc)
     def impl(*_):
         deps = deps_func()
@@ -12,6 +10,7 @@ def _build_dependendencies_for(doc):
 
 for doc in SYW__DOCUMENTS:
     doc_dir = Path(doc).parent
+    build_dir = SYW__WORK_PATHS.build / doc
     pdf = build_dir / Path(doc).with_suffix(".pdf")
     synctex = build_dir / Path(doc).with_suffix(".synctex.gz")
 
@@ -67,5 +66,9 @@ for doc in SYW__DOCUMENTS:
                 synctex
             output:
                 Path(doc).with_suffix(".synctex.gz")
+            params:
+                build_dir=build_dir.resolve(),
             run:
-                fix_synctex_paths(build_dir.resolve(), input[0], output[0])
+                from showyourwork2.plugins.tex.synctex import fix_synctex_paths
+
+                fix_synctex_paths(params.build_dir, input[0], output[0])

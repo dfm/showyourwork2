@@ -1,6 +1,3 @@
-from showyourwork2 import utils
-from showyourwork2.plugins.staging import stages
-
 for name, stage in stages.STAGES.items():
     if not isinstance(stage, stages.NoOpStage):
         continue

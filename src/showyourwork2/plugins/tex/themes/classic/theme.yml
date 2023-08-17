@@ -1,0 +1,25 @@
+extends: "base"
+config:
+  margin_icons:
+    type: object
+    properties:
+      colors:
+        type: object
+        properties:
+          github:
+            type: string
+            default: "0.12,0.47,0.71"
+          sandbox:
+            type: string
+            default: "0.80,0.14,0.19"
+          cache:
+            type: string
+            default: "0.12,0.47,0.71"
+          dataset:
+            type: string
+            default: "0.12,0.47,0.71"
+      monochrome:
+        type: boolean
+      horizontal_offset:
+        type: number
+        default: 0

@@ -1,21 +1,24 @@
 import re
 from pathlib import Path
-from typing import Iterable, List
+from typing import Any, Dict, Iterable, List
 from xml.etree import ElementTree
 
 from showyourwork2 import paths
+from showyourwork2.logging import get_logger
 from showyourwork2.utils import json_dump
 
 
 def parse_dependencies(
-    xmlfile: paths.PathLike,
+    from_xmlfile: paths.PathLike,
     depfile: paths.PathLike,
     base_path: paths.PathLike,
     project_root: paths.PathLike,
+    config: Dict[str, Any],
 ) -> None:
+    logger = get_logger(config)
+
     base_path = Path(base_path).resolve()
-    xmlfile = Path(xmlfile)
-    data = xmlfile.read_text()
+    data = Path(from_xmlfile).read_text()
     xml_tree = ElementTree.fromstring("<HTML>" + data + "</HTML>")
 
     # Parse the \graphicspath command
@@ -26,8 +29,10 @@ def parse_dependencies(
     graphics_path = base_path
     if len(gpath_elements) > 0:
         if len(gpath_elements) > 1:
-            # TODO(dfm): Add a warning here.
-            pass
+            logger.warning(
+                "Multiple \\graphicspath commands found when parsing TeX document; "
+                "this can lead to undefined behavior"
+            )
         text = gpath_elements[-1].text
         if text is not None:
             graphics_path = re.findall("\\{(.*?)\\}", text)[0]
@@ -47,8 +52,10 @@ def parse_dependencies(
         labels = figure.findall("LABEL")
         if len(labels):
             if len(labels) > 1:
-                # TODO(dfm): Add a warning here.
-                pass
+                logger.warning(
+                    "Multiple labels found for a single figure when parsing TeX "
+                    "document; this is unsupported, and the first label will be used"
+                )
             label = labels[0].text
             figures[label] = graphics
         else:

@@ -1,0 +1,44 @@
+description: "Configuration for the showyourwork TeX plugin"
+type: object
+additionalProperties: false
+properties:
+  synctex:
+    description: "Enable synctex support"
+    type: boolean
+
+  theme:
+    oneOf:
+      - $ref: "#/$defs/tex-theme-name-or-spec"
+      - type: array
+        description: "A list of theme specifications for each document"
+        items:
+          type: object
+          required:
+            - document
+          properties:
+            document:
+              type: string
+              description: "The document name"
+            theme:
+              $ref: "#/$defs/tex-theme-name-or-spec"
+
+$defs:
+  tex-theme-name-or-spec:
+    oneOf:
+      - type: string
+        description: "The name of a built-in TeX theme"
+      - type: object
+        description: "Specification for a TeX theme"
+        oneOf:
+          - required:
+              - name
+            properties:
+              name:
+                type: string
+                description: "The name of a built-in TeX theme"
+          - required:
+              - path
+            properties:
+              path:
+                type: string
+                description: "The path to a local theme, relative to the project root"

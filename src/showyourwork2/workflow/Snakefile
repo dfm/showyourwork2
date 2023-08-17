@@ -5,15 +5,14 @@ from pathlib import Path
 
 from showyourwork2 import paths, utils
 from showyourwork2.paths import package_data
-from showyourwork2.config import parse_config
-from showyourwork2.rule_order import fix_rule_order
-from showyourwork2.logging import patch_snakemake_logging
 
 SYW__PROJECT_ROOT = paths.find_project_root()
 workdir: SYW__PROJECT_ROOT
 
 # Parse and validate the configuration; apply defaults
+from showyourwork2.config import parse_config
 config = parse_config(config, required_version=2)
+del parse_config
 
 # Extract some commonly used config values
 SYW__DOCUMENTS = config["documents"]
@@ -59,7 +58,11 @@ if (SYW__PROJECT_ROOT / "Snakefile").is_file():
     include: SYW__PROJECT_ROOT / "Snakefile"
 
 # Handle the rule order for ambiguous rules
+from showyourwork2.rule_order import fix_rule_order
 fix_rule_order(config, workflow)
+del fix_rule_order
 
 # Patch the snakemake logger for our purposes
+from showyourwork2.logging import patch_snakemake_logging
 patch_snakemake_logging(config)
+del patch_snakemake_logging
