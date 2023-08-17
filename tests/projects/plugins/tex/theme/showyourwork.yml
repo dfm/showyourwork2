@@ -1,0 +1,18 @@
+config-version: 2
+
+conda: environment.yml
+
+documents:
+  - doc1.tex
+  - doc2.tex
+
+dynamic:
+  - script: generate_figure.py
+    output: figure.pdf
+
+tex:
+  theme:
+    - document: doc1.tex
+      theme: base
+    - document: doc2.tex
+      theme: classic

@@ -1,6 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 import yaml
 from jinja2 import Environment, FileSystemLoader
@@ -25,7 +25,12 @@ class Theme:
                         resources[key] = resource
         return resources
 
-    def render(self, template_name: str, config: Dict[str, Any]) -> str:
+    def render(
+        self,
+        template_name: str,
+        config: Dict[str, Any],
+        dependencies: Optional[Dict[str, Any]] = None,
+    ) -> str:
         env = Environment(
             block_start_string="((*",
             block_end_string="*))",
@@ -36,12 +41,18 @@ class Theme:
             autoescape=False,
             loader=FileSystemLoader(self._hierarchy),
         )
-        return env.get_template(template_name).render(**config)
+        return env.get_template(template_name).render(
+            config=config, dependencies=dependencies
+        )
 
     def render_to(
-        self, template_name: str, target_file: PathLike, config: Dict[str, Any]
+        self,
+        template_name: str,
+        target_file: PathLike,
+        config: Dict[str, Any],
+        dependencies: Optional[Dict[str, Any]] = None,
     ) -> None:
-        txt = self.render(template_name, config)
+        txt = self.render(template_name, config, dependencies=dependencies)
         with open(target_file, "w") as f:
             f.write(txt)
 
@@ -93,6 +104,6 @@ def get_theme_for_document(config: Dict[str, Any], document_name: PathLike) -> T
 
     for entry in theme:
         if document_name == entry["document"]:
-            return Theme(theme)
+            return Theme(entry["theme"])
 
     raise ValueError(f"Could not resolve theme for document '{document_name}'")
