@@ -12,7 +12,8 @@ class Theme:
     def __init__(self, spec: Union[str, Dict[str, str]]):
         self.path = resolve_theme_path(spec)
         self._hierarchy: List[Path] = []
-        _walk_theme_hierarchy(self.path, self._hierarchy)
+        self.config: Dict[str, Any] = {}
+        _walk_theme_hierarchy(self.path, self._hierarchy, self.config)
 
     def resources_for_template(self, template_slug: str) -> Dict[Path, Path]:
         resources: Dict[Path, Path] = {}
@@ -65,13 +66,16 @@ def _load_theme_config(theme: Path) -> Dict[str, Any]:
     return {}
 
 
-def _walk_theme_hierarchy(theme: Path, themes: List[Path]) -> None:
+def _walk_theme_hierarchy(
+    theme: Path, themes: List[Path], config: Dict[str, Any]
+) -> None:
     themes.append(theme)
-    config = _load_theme_config(theme)
-    if "extends" in config:
-        parent = resolve_theme_path(config["extends"])
+    c = _load_theme_config(theme)
+    if "extends" in c:
+        parent = resolve_theme_path(c["extends"])
         if parent not in themes:
-            _walk_theme_hierarchy(parent, themes)
+            _walk_theme_hierarchy(parent, themes, config)
+    config.update(c.get("config", {}))
 
 
 @lru_cache

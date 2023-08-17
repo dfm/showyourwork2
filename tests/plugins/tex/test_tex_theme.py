@@ -19,7 +19,7 @@ from showyourwork2.plugins.tex.theme import Theme
         ],
     ],
 )
-def test_tex_valid_theme_config(theme: Any) -> None:
+def test_tex_theme_config_valid(theme: Any) -> None:
     parse_config(
         {
             "config_version": 2,
@@ -33,7 +33,7 @@ def test_tex_valid_theme_config(theme: Any) -> None:
     "theme",
     [0, [{"theme": "base"}]],
 )
-def test_tex_invalid_theme_config(theme: Any) -> None:
+def test_tex_theme_config_invalid(theme: Any) -> None:
     with pytest.raises(ValidationError):
         parse_config(
             {
