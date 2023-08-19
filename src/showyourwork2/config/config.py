@@ -1,5 +1,5 @@
 import sys
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import yaml
 from pydantic import create_model
@@ -21,7 +21,7 @@ def load_config(file: PathLike) -> Config:
     if config is None:
         config = {}
 
-    return parse_config(config)
+    return parse_config(config)[0]
 
 
 def normalize_keys(config: Any) -> Any:
@@ -36,7 +36,7 @@ def normalize_keys(config: Any) -> Any:
     return config
 
 
-def parse_config(config: Dict[str, Any]) -> Config:
+def parse_config(config: Dict[str, Any]) -> Tuple[Config, PluginManager]:
     config = normalize_keys(config)
 
     # Extract the plugins and add the default TeX plugin if required
@@ -61,4 +61,4 @@ def parse_config(config: Dict[str, Any]) -> Config:
         documents=(List[Document], []),  # type: ignore
     )
 
-    return Config.model_validate(config)
+    return Config.model_validate(config), plugin_manager

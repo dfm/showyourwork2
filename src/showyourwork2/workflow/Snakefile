@@ -11,7 +11,7 @@ workdir: SYW__PROJECT_ROOT
 
 # Parse and validate the configuration; apply defaults
 from showyourwork2.config import parse_config
-config = parse_config(config)
+config, plugin_manager = parse_config(config)
 del parse_config
 
 # Extract some commonly used config values
