@@ -2,7 +2,7 @@ import hashlib
 from functools import cached_property, lru_cache
 from importlib.resources import as_file, files
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Optional, Union
 
 PathLike = Union[str, Path]
 
@@ -76,15 +76,12 @@ class PathMeta:
 
 
 class repo(PathMeta):
-    def __init__(self, config: Dict[str, Any]):
-        self.config = config
+    def __init__(self) -> None:
         self.root = find_project_root()
 
 
 class work(PathMeta):
-    def __init__(self, config: Dict[str, Any]):
-        self.config = config
-        working_directory = config.get("working_directory", None)
+    def __init__(self, working_directory: Optional[PathLike] = None) -> None:
         if working_directory is None:
             working_directory = find_project_root() / ".showyourwork"
         else:

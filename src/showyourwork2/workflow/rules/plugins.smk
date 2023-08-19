@@ -1,6 +1,6 @@
 import importlib
 
-for plugin in config.get("plugins", []):
+for plugin in config.plugins:
     mod = importlib.import_module(plugin)
     if not hasattr(mod, "snakefiles"):
         # TODO(dfm): log warning

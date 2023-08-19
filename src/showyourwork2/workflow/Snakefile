@@ -11,22 +11,22 @@ workdir: SYW__PROJECT_ROOT
 
 # Parse and validate the configuration; apply defaults
 from showyourwork2.config import parse_config
-config = parse_config(config, required_version=2)
+config = parse_config(config)
 del parse_config
 
 # Extract some commonly used config values
-SYW__DOCUMENTS = config["documents"]
-SYW__REPO_PATHS = paths.repo(config)
-SYW__WORK_PATHS = paths.work(config)
+SYW__DOCUMENTS = config.documents
+SYW__REPO_PATHS = paths.repo()
+SYW__WORK_PATHS = paths.work(working_directory=config.working_directory)
 
 # This is used for printing the list of artifact names
-_list_artifacts = ", ".join(map("'{}'".format, config.get("artifacts", [])))
+_list_artifacts = ", ".join(map("'{}'".format, [a for doc in SYW__DOCUMENTS for a in doc.artifacts]))
 
 rule all:
     message:
         f"Generating artifacts: {_list_artifacts}"
     input:
-        config.get("artifacts", [])
+        [doc.artifacts for doc in SYW__DOCUMENTS]
 
 del _list_artifacts
 
@@ -36,9 +36,8 @@ rule:
     output:
         "config.json"
     run:
-        import json
         with open(output[0], "w") as f:
-            utils.json_dump(config, f)
+            f.write(config.model_dump_json(indent=2))
 
 # Include the rules from the main showyourwork workflow
 include_rules = partial(package_data, "showyourwork2", "workflow", "rules")
@@ -49,7 +48,7 @@ include: include_rules("dynamic.smk")
 include: include_rules("plugins.smk")
 
 # Include the rules from any user-defined local Snakefiles
-for snakefile in config.get("local_snakefiles", []):
+for snakefile in config.snakefiles:
     include: snakefile
 
 # For backwards compatibility, we include the top-level project Snakefile if it

@@ -1,14 +1,14 @@
 import importlib
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import snakemake
 
+from showyourwork2.config.models import Config
 
-def get_rule_priority(
-    config: Dict[str, Any], rule: "snakemake.ruleinfo.RuleInfo"
-) -> int:
-    for plugin in config.get("plugins", []):
+
+def get_rule_priority(config: Config, rule: "snakemake.ruleinfo.RuleInfo") -> int:
+    for plugin in config.plugins:
         mod = importlib.import_module(plugin)
         if hasattr(mod, "get_rule_priority"):
             priority = mod.get_rule_priority(config, rule)
@@ -22,9 +22,7 @@ def get_rule_priority(
     return 100
 
 
-def fix_rule_order(
-    config: Dict[str, Any], workflow: "snakemake.workflow.Workflow"
-) -> None:
+def fix_rule_order(config: Config, workflow: "snakemake.workflow.Workflow") -> None:
     """Update the rule order for all rules defined by the workflow
 
     The logic here is that we want all user-defined rules to be higher priority

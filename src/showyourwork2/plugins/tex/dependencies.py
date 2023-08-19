@@ -1,9 +1,10 @@
 import re
 from pathlib import Path
-from typing import Any, Dict, Iterable, List
+from typing import Iterable, List
 from xml.etree import ElementTree
 
 from showyourwork2 import paths
+from showyourwork2.config.models import Config
 from showyourwork2.logging import get_logger
 from showyourwork2.utils import json_dump
 
@@ -13,7 +14,7 @@ def parse_dependencies(
     depfile: paths.PathLike,
     base_path: paths.PathLike,
     project_root: paths.PathLike,
-    config: Dict[str, Any],
+    config: Config,
 ) -> None:
     logger = get_logger(config)
 

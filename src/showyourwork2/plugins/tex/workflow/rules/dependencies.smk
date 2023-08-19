@@ -13,7 +13,9 @@ from showyourwork2.plugins.tex.dependencies import parse_dependencies
 # We only define these rules for documents explicitly listed in the config file
 # because we otherwise end up with ambigious rules for other TeX files. So here
 # we're looping over all the document paths.
-for doc, explicit_deps in SYW__DOCUMENTS.items():
+for document in SYW__DOCUMENTS:
+    doc = document.path
+    explicit_deps = document.dependencies
     doc_dir = Path(doc).parent
     deps_dir = SYW__WORK_PATHS / "dependencies" / doc
     xml =  deps_dir / doc_dir / f"{Path(doc).with_suffix('').name}.dependencies.xml"

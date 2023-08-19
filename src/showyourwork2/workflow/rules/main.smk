@@ -4,7 +4,11 @@ root to the work directory. These can be overloaded by users or plugins to
 generate a working copy of the documents differently.
 """
 
-for doc in SYW__DOCUMENTS:
+for document in SYW__DOCUMENTS:
+    doc = document.path
+    if not doc.exists():
+        continue
+
     rule:
         """
         Copy a document from the project root to the work directory.

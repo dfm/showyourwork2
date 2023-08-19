@@ -1,4 +1,4 @@
-from showyourwork2.plugins.tex.theme import get_theme_for_document
+from showyourwork2.plugins.tex.theme import Theme
 from showyourwork2.paths import path_to_rule_name
 
 sywplug_tex__rule_name = partial(
@@ -22,12 +22,13 @@ def sywplug_tex__local_or_provided_style(document):
 for base_path in [SYW__WORK_PATHS / "dependencies", SYW__WORK_PATHS / "build"]:
     slug = base_path.name
 
-    for doc in SYW__DOCUMENTS:
+    for document in SYW__DOCUMENTS:
+        doc = document.path
         doc_dir = Path(doc).parent
         work_dir = base_path / doc
 
         # Work out the theme resources
-        theme = get_theme_for_document(config, doc)
+        theme = Theme(document.theme)
         theme_resources = theme.resources_for_template(slug)
 
         rule:
@@ -72,7 +73,7 @@ for base_path in [SYW__WORK_PATHS / "dependencies", SYW__WORK_PATHS / "build"]:
             params:
                 slug=slug,
                 config=config,
-                doc=doc,
+                theme=theme,
             run:
                 import json
                 if input.dependencies_file:
@@ -81,8 +82,7 @@ for base_path in [SYW__WORK_PATHS / "dependencies", SYW__WORK_PATHS / "build"]:
                 else:
                     dependencies = None
 
-                theme = get_theme_for_document(params.config, params.doc)
-                theme.render_to(
+                params.theme.render_to(
                     template_name=f"{params.slug}.tex",
                     target_file=output[0],
                     config=params.config,

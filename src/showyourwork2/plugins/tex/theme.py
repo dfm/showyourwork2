@@ -1,16 +1,17 @@
-from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 import yaml
 from jinja2 import Environment, FileSystemLoader
 
-from showyourwork2.paths import PathLike, package_data
+from showyourwork2.paths import PathLike
+from showyourwork2.plugins.tex.models import Theme as ThemeModel, _theme_path_from_name
 
 
 class Theme:
-    def __init__(self, spec: Union[str, Dict[str, str]]):
-        self.path = resolve_theme_path(spec)
+    def __init__(self, model: ThemeModel):
+        self.path = model.path
+        self.options = model.options
         self._hierarchy: List[Path] = []
         self.config: Dict[str, Any] = {}
         _walk_theme_hierarchy(self.path, self._hierarchy, self.config)
@@ -78,18 +79,18 @@ def _walk_theme_hierarchy(
     config.update(c.get("config", {}))
 
 
-@lru_cache
-def _get_built_in_themes() -> Dict[str, Path]:
-    path = package_data("showyourwork2.plugins.tex", "themes")
-    themes = list(sorted(path.glob("*")))
-    return {t.name: t for t in themes}
+# @lru_cache
+# def _get_built_in_themes() -> Dict[str, Path]:
+#     path = package_data("showyourwork2.plugins.tex", "themes")
+#     themes = list(sorted(path.glob("*")))
+#     return {t.name: t for t in themes}
 
 
-def _theme_path_from_name(name: str) -> Path:
-    built_in = _get_built_in_themes()
-    if name in built_in:
-        return built_in[name]
-    return package_data(name)
+# def _theme_path_from_name(name: str) -> Path:
+#     built_in = _get_built_in_themes()
+#     if name in built_in:
+#         return built_in[name]
+#     return package_data(name)
 
 
 def resolve_theme_path(theme: Union[str, Dict[str, str]]) -> Path:
@@ -100,14 +101,14 @@ def resolve_theme_path(theme: Union[str, Dict[str, str]]) -> Path:
     return Path(theme["path"])
 
 
-def get_theme_for_document(config: Dict[str, Any], document_name: PathLike) -> Theme:
-    theme = config.get("tex", {}).get("theme", "base")
+# def get_theme_for_document(config: Dict[str, Any], document_name: PathLike) -> Theme:
+#     theme = config.get("tex", {}).get("theme", "base")
 
-    if isinstance(theme, (str, dict)):
-        return Theme(theme)
+#     if isinstance(theme, (str, dict)):
+#         return Theme(theme)
 
-    for entry in theme:
-        if document_name == entry["document"]:
-            return Theme(entry["theme"])
+#     for entry in theme:
+#         if document_name == entry["document"]:
+#             return Theme(entry["theme"])
 
-    raise ValueError(f"Could not resolve theme for document '{document_name}'")
+#     raise ValueError(f"Could not resolve theme for document '{document_name}'")

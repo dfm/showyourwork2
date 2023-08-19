@@ -4,13 +4,9 @@ from tempfile import TemporaryDirectory
 from typing import Generator
 
 import pytest
+from pydantic import ValidationError
 
-from showyourwork2.config.config import (
-    ConfigVersionError,
-    ValidationError,
-    load_config,
-    normalize_keys,
-)
+from showyourwork2.config.config import load_config, normalize_keys
 
 
 def test_normalize_keys() -> None:
@@ -43,13 +39,13 @@ def test_minimal_valid(sep: str) -> None:
 
 def test_missing_version() -> None:
     with temp_config_file("") as f:
-        with pytest.raises(ConfigVersionError):
+        with pytest.raises(ValidationError):
             load_config(f)
 
 
 def test_invalid_version() -> None:
     with temp_config_file("config-version: 1") as f:
-        with pytest.raises(ConfigVersionError):
+        with pytest.raises(ValidationError):
             load_config(f)
 
 
@@ -92,8 +88,6 @@ def test_document() -> None:
     with temp_config_file(
         """
 config-version: 2
-document-dependencies:
-    - dep0
 documents:
     - path: test1
     - test2
@@ -104,8 +98,9 @@ documents:
 """
     ) as f:
         config = load_config(f)
-        assert config["documents"] == {
-            "test1": ["dep0"],
-            "test2": ["dep0"],
-            "test3": ["dep0", "dep1", "dep2"],
-        }
+        assert config.documents[0].path == Path("test1")
+        assert config.documents[0].dependencies == []
+        assert config.documents[1].path == Path("test2")
+        assert config.documents[1].dependencies == []
+        assert config.documents[2].path == Path("test3")
+        assert config.documents[2].dependencies == [Path("dep1"), Path("dep2")]
