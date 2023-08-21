@@ -73,6 +73,6 @@ rule:
     name:
         sywplug_tex__rule_name("dependencies")
     input:
-        [SYW__WORK_PATHS.dependencies_for(doc) for doc in SYW__DOCUMENTS]
+        [SYW__WORK_PATHS.dependencies_for(doc.path) for doc in SYW__DOCUMENTS]
     output:
         touch(SYW__WORK_PATHS.flag("tex_dependencies"))

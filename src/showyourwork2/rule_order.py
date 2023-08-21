@@ -1,20 +1,19 @@
-import importlib
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
+
+from showyourwork2.plugins import PluginManager
 
 if TYPE_CHECKING:
     import snakemake
 
-from showyourwork2.config.models import Config
 
-
-def get_rule_priority(config: Config, rule: "snakemake.ruleinfo.RuleInfo") -> int:
-    for plugin in config.plugins:
-        mod = importlib.import_module(plugin)
-        if hasattr(mod, "get_rule_priority"):
-            priority = mod.get_rule_priority(config, rule)
-            if priority is not None:
-                return priority
-
+def get_rule_priority(
+    rule: "snakemake.ruleinfo.RuleInfo",
+    plugin_manager: Optional[PluginManager] = None,
+) -> int:
+    if plugin_manager is not None:
+        priority = plugin_manager.hook.rule_priority(rule=rule)
+        if priority:
+            return min(priority)
     if rule.name.startswith("syw__"):
         return 0
     elif rule.name.startswith("sywplug_"):
@@ -22,7 +21,10 @@ def get_rule_priority(config: Config, rule: "snakemake.ruleinfo.RuleInfo") -> in
     return 100
 
 
-def fix_rule_order(config: Config, workflow: "snakemake.workflow.Workflow") -> None:
+def fix_rule_order(
+    workflow: "snakemake.workflow.Workflow",
+    plugin_manager: Optional[PluginManager] = None,
+) -> None:
     """Update the rule order for all rules defined by the workflow
 
     The logic here is that we want all user-defined rules to be higher priority
@@ -33,9 +35,9 @@ def fix_rule_order(config: Config, workflow: "snakemake.workflow.Workflow") -> N
     """
     rules = list(workflow.rules)
     for n, r1 in enumerate(rules):
-        p1 = get_rule_priority(config, r1)
+        p1 = get_rule_priority(r1, plugin_manager=plugin_manager)
         for r2 in rules[n + 1 :]:
-            p2 = get_rule_priority(config, r2)
+            p2 = get_rule_priority(r2, plugin_manager=plugin_manager)
             if p1 > p2:
                 workflow.ruleorder(r1.name, r2.name)
             elif p1 < p2:

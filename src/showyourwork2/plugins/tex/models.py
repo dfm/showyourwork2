@@ -7,7 +7,7 @@ from pydantic import BaseModel, computed_field, model_validator  # type: ignore
 from showyourwork2.paths import package_data
 
 
-class Theme(BaseModel):
+class ThemeModel(BaseModel):
     path: Path
     options: Dict[str, Any] = {}
 
@@ -24,7 +24,7 @@ class Theme(BaseModel):
 class Document(BaseModel):
     build_tex: Optional[bool] = None
     synctex: bool = True
-    theme: Theme = Theme(
+    theme: ThemeModel = ThemeModel(
         path=package_data("showyourwork2.plugins.tex", "themes", "base")
     )
 

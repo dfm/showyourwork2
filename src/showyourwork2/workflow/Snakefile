@@ -45,7 +45,10 @@ include: include_rules("main.smk")
 include: include_rules("dependencies.smk")
 include: include_rules("static.smk")
 include: include_rules("dynamic.smk")
-include: include_rules("plugins.smk")
+
+# Include any rules from plugins
+for snakefile in plugin_manager.hook.snakefile():
+    include: snakefile
 
 # Include the rules from any user-defined local Snakefiles
 for snakefile in config.snakefiles:
@@ -58,7 +61,7 @@ if (SYW__PROJECT_ROOT / "Snakefile").is_file():
 
 # Handle the rule order for ambiguous rules
 from showyourwork2.rule_order import fix_rule_order
-fix_rule_order(config, workflow)
+fix_rule_order(workflow, plugin_manager=plugin_manager)
 del fix_rule_order
 
 # Patch the snakemake logger for our purposes

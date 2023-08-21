@@ -5,7 +5,7 @@ import yaml
 from jinja2 import Environment, FileSystemLoader
 
 from showyourwork2.paths import PathLike
-from showyourwork2.plugins.tex.models import Theme as ThemeModel, _theme_path_from_name
+from showyourwork2.plugins.tex.models import ThemeModel, _theme_path_from_name
 
 
 class Theme:

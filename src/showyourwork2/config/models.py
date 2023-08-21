@@ -81,6 +81,12 @@ class Config(BaseModel):
             )
         return config_version
 
+    @model_validator(mode="after")
+    def expect_at_least_one_document(self) -> "Config":
+        if not self.documents:
+            raise ValueError("No documents were specified in the configuration file")
+        return self
+
 
 @hookimpl
 def document_model() -> Type[Document]:

@@ -5,6 +5,7 @@ from pydantic import ValidationError
 
 from showyourwork2.config import parse_config
 from showyourwork2.paths import package_data
+from showyourwork2.plugins.tex.models import ThemeModel
 from showyourwork2.plugins.tex.theme import Theme
 
 
@@ -54,7 +55,8 @@ def test_tex_theme_config_invalid(theme: Any) -> None:
     ],
 )
 def test_base_theme(spec: Any) -> None:
-    theme = Theme(spec)
+    model = ThemeModel.model_validate(spec)
+    theme = Theme(model)
     assert len(theme._hierarchy) == 1
     assert theme._hierarchy[0] == theme.path
     assert theme.resources_for_template("dependencies") == {}
@@ -72,7 +74,8 @@ def test_base_theme(spec: Any) -> None:
     ],
 )
 def test_classic_theme(spec: Any) -> None:
-    theme = Theme(spec)
+    model = ThemeModel.model_validate(spec)
+    theme = Theme(model)
     assert len(theme._hierarchy) == 2  # noqa: PLR2004
     assert theme._hierarchy[0] == theme.path
     assert theme._hierarchy[1].name == "base"

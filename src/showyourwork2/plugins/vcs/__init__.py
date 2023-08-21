@@ -1,21 +1,16 @@
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Type
 
-from showyourwork2 import git
-from showyourwork2.paths import PathLike, package_data
-
-
-def snakefiles() -> List[Path]:
-    return [package_data("showyourwork2.plugins.vcs", "workflow", "Snakefile")]
+from showyourwork2.paths import package_data
+from showyourwork2.plugins.hooks import hookimpl
+from showyourwork2.plugins.vcs.models import Document
 
 
-def filter_files_below(file_list: List[str], file: PathLike) -> List[str]:
-    parent = Path(file).parent
-    return [f for f in file_list if Path(f).is_relative_to(parent)]
+@hookimpl
+def snakefile() -> Path:
+    return package_data("showyourwork2.plugins.vcs", "workflow", "Snakefile")
 
 
-def postprocess_config(config: Dict[str, Any]) -> None:
-    git_files = git.list_files()
-    for key, deps in config["documents"].items():
-        git_deps = filter_files_below(git_files, key)
-        config["documents"][key] = list(deps) + git_deps
+@hookimpl
+def document_model() -> Type[Document]:
+    return Document
