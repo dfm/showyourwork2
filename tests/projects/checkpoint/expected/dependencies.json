@@ -1,0 +1,16 @@
+{
+  "checkpoint.flag": [
+    "dynamic_deps.txt"
+  ],
+  "dag.flag": [
+    "dep1.txt"
+  ],
+  "dep1.txt": [
+    "dep0"
+  ],
+  "dependencies.json": [
+    "checkpoint.flag",
+    "dag.flag"
+  ],
+  "dynamic_deps.txt": []
+}

@@ -1,0 +1,69 @@
+checkpoint check_deps:
+    input:
+        "dynamic_deps.txt"
+    output:
+        touch("checkpoint.flag")
+
+def get_dependencies(*_):
+    checkpoints.check_deps.get()
+    with open("dynamic_deps.txt") as f:
+        return f.read().splitlines()
+
+rule dag:
+    input:
+        get_dependencies
+    output:
+        touch("dag.flag")
+
+def ensure_dependencies(*_):
+    import inspect
+    from collections import defaultdict
+
+    checkpoints.check_deps.get()
+
+    dag = None
+    for level in inspect.stack():
+        dag = level.frame.f_locals.get("dag", None)
+        if dag is not None:
+            break
+
+    assert dag is not None
+
+    parents = defaultdict(set)
+    for job in dag.jobs:
+        for output in job.output:
+            parents[output] |= set(str(f) for f in job.input)
+    parents = {k: list(sorted(v)) for k, v in parents.items()}
+
+    config["dependencies"] = parents
+
+    return []
+
+rule deps:
+    input:
+        "dag.flag",
+        ensure_dependencies
+    output:
+        "dependencies.json"
+    run:
+        import json
+        with open(output[0], "w") as f:
+            json.dump(config["dependencies"], f, indent=2, sort_keys=True)
+
+rule gen_dep:
+    input:
+        "dep0"
+    output:
+        "dep1.txt"
+    shell:
+        """
+        cat {input} > {output}
+        """
+
+rule dynamic_deps:
+    output:
+        "dynamic_deps.txt"
+    shell:
+        """
+        echo "dep1.txt" > dynamic_deps.txt
+        """

@@ -3,7 +3,11 @@ from pathlib import Path
 from typing import List
 
 from showyourwork2.dependencies import simplify_dependency_tree
-from showyourwork2.testing import run_showyourwork
+from showyourwork2.testing import run_showyourwork, run_snakemake
+
+
+def test_checkpoint_logic() -> None:
+    run_snakemake("tests/projects/checkpoint", "dependencies.json")
 
 
 def test_dependency_tree() -> None:

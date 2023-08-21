@@ -1,4 +1,3 @@
 config-version: 2
 documents:
   - path: ms.tex
-    dependencies: ["h"]
