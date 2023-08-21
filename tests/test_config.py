@@ -33,7 +33,7 @@ def temp_config_file(body: str) -> Generator[Path, None, None]:
 
 @pytest.mark.parametrize("sep", ["-", "_"])
 def test_minimal_valid(sep: str) -> None:
-    with temp_config_file(f"config{sep}version: 2") as f:
+    with temp_config_file(f"config{sep}version: 2\ndocuments: ['ms.tex']") as f:
         load_config(f)
 
 
