@@ -12,8 +12,7 @@ from tempfile import TemporaryDirectory as _TemporaryDirectory
 from typing import Any, Callable, Generator, Iterable, List, Optional, Union
 
 from showyourwork2 import cli
-from showyourwork2.git import commit as git_commit
-from showyourwork2.git import git
+from showyourwork2.git import commit as git_commit, git
 from showyourwork2.paths import PathLike, find_project_root
 
 # We put all the conda environments in a single directory so that we can reuse

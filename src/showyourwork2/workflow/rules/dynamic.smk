@@ -7,17 +7,15 @@ scripts = {
     "py": "python {script} {output}",
     "ipynb": "jupyter execute {script}",
 }
-scripts = dict(scripts, **config.get("scripts", {}))
+scripts = dict(scripts, **config.scripts)
 
-for dynamic in config.get("dynamic", []):
-    script = dynamic["script"]
+for dynamic in config.dynamic:
+    script = dynamic.script
     name = utils.rule_name("dynamic", document=script)
     message = f"Running script '{script}'"
-    input = dynamic.get("input", [])
-    output = dynamic.get("output", [])
-    if isinstance(output, str):
-        output = [output]
-    conda = dynamic.get("conda", config.get("conda", None))
+    input = dynamic.input
+    output = dynamic.output
+    conda = dynamic.conda or config.conda
     if conda is not None:
         conda = repo_path / conda
 

@@ -4,11 +4,10 @@ from typing import Any, Dict, Optional
 import snakemake
 
 from showyourwork2 import paths
+from showyourwork2.config.models import Config
 
 
-def get_logger(
-    config: Optional[Dict[str, Any]] = None, **stream_kwargs: Any
-) -> logging.Logger:
+def get_logger(config: Optional[Config] = None, **stream_kwargs: Any) -> logging.Logger:
     logger = logging.getLogger("showyourwork2")
 
     if not logger.handlers:
@@ -23,7 +22,7 @@ def get_logger(
         # If this is called from within a Snakemake workflow, then we'll get the
         # config object and we can write the logs to a file.
         if config is not None:
-            log_file = paths.work(config).logs / "showyourwork.log"
+            log_file = paths.work(config.working_directory).logs / "showyourwork.log"
             file_handler = logging.FileHandler(log_file)
             file_handler.setLevel(logging.DEBUG)
             logger.addHandler(file_handler)
@@ -35,8 +34,8 @@ def pass_log_info(msg: str) -> bool:
     return msg.startswith("Nothing to be done") or msg.startswith("Deleting ")
 
 
-def patch_snakemake_logging(config: Dict[str, Any]) -> None:
-    verbose = config.get("verbose", False)
+def patch_snakemake_logging(config: Config) -> None:
+    verbose = config.verbose
     logger = get_logger(config)
     snakemake_logger = snakemake.logging.logger
 
@@ -56,7 +55,7 @@ def patch_snakemake_logging(config: Dict[str, Any]) -> None:
 
     # Custom Snakemake file handler
     if not hasattr(snakemake_logger, "custom_file_handler"):
-        log_file = paths.work(config).logs / "snakemake.log"
+        log_file = paths.work(config.working_directory).logs / "snakemake.log"
         snakemake_logger.custom_file_handler = logging.FileHandler(log_file)
         snakemake_logger.custom_file_handler.setLevel(logging.DEBUG)
         snakemake_logger.logger.addHandler(snakemake_logger.custom_file_handler)

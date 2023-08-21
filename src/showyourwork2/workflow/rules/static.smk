@@ -1,6 +1,6 @@
 build_path = SYW__WORK_PATHS.build
 
-for static_file in config.get("static", []):
+for static_file in config.static:
     rule:
         name:
             utils.rule_name("static", document=static_file)

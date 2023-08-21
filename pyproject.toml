@@ -16,10 +16,13 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
+    "snakemake>=7.15.2",                     # TODO(dfm): figure out what minimum version we _actually_ need
     "requests",
+    "tomli>=1.1.0; python_version < '3.11'",
+    "pydantic",
+    "pluggy",
     "pyyaml",
     "jsonschema",
-    "snakemake>=7.15.2", # TODO(dfm): figure out what minimum version we _actually_ need
     "click",
     "ensureconda",
     "Jinja2",
@@ -75,3 +78,4 @@ exclude = []
 
 [tool.ruff.isort]
 known-first-party = ["showyourwork2"]
+combine-as-imports = true

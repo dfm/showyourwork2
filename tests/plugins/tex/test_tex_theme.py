@@ -1,9 +1,11 @@
 from typing import Any
 
 import pytest
+from pydantic import ValidationError
 
-from showyourwork2.config import ValidationError, parse_config
+from showyourwork2.config import parse_config
 from showyourwork2.paths import package_data
+from showyourwork2.plugins.tex.models import ThemeModel
 from showyourwork2.plugins.tex.theme import Theme
 
 
@@ -13,10 +15,6 @@ from showyourwork2.plugins.tex.theme import Theme
         "base",
         {"name": "base"},
         {"path": "theme/directory"},
-        [
-            {"document": "ms1.tex", "theme": "base"},
-            {"document": "ms2.tex", "theme": {"path": "theme/directory"}},
-        ],
     ],
 )
 def test_tex_theme_config_valid(theme: Any) -> None:
@@ -24,7 +22,9 @@ def test_tex_theme_config_valid(theme: Any) -> None:
         {
             "config_version": 2,
             "plugins": ["showyourwork2.plugins.tex"],
-            "tex": {"theme": theme},
+            "documents": [
+                {"path": "ms.tex", "theme": theme},
+            ],
         }
     )
 
@@ -39,7 +39,9 @@ def test_tex_theme_config_invalid(theme: Any) -> None:
             {
                 "config-version": 2,
                 "plugins": ["showyourwork2.plugins.tex"],
-                "tex": {"theme": theme},
+                "documents": [
+                    {"path": "ms.tex", "theme": theme},
+                ],
             }
         )
 
@@ -53,7 +55,8 @@ def test_tex_theme_config_invalid(theme: Any) -> None:
     ],
 )
 def test_base_theme(spec: Any) -> None:
-    theme = Theme(spec)
+    model = ThemeModel.model_validate(spec)
+    theme = Theme(model)
     assert len(theme._hierarchy) == 1
     assert theme._hierarchy[0] == theme.path
     assert theme.resources_for_template("dependencies") == {}
@@ -71,7 +74,8 @@ def test_base_theme(spec: Any) -> None:
     ],
 )
 def test_classic_theme(spec: Any) -> None:
-    theme = Theme(spec)
+    model = ThemeModel.model_validate(spec)
+    theme = Theme(model)
     assert len(theme._hierarchy) == 2  # noqa: PLR2004
     assert theme._hierarchy[0] == theme.path
     assert theme._hierarchy[1].name == "base"

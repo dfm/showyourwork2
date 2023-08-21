@@ -5,3 +5,6 @@ conda: environment.yml
 dynamic:
   - script: generate_figure.py
     output: figure.pdf
+
+documents:
+  - path: ms.tex

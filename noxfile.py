@@ -45,6 +45,8 @@ def examples(session: nox.Session) -> None:
     session.install(".[examples]")
     examples = list(sorted(Path("examples").glob("*")))
     for example in examples:
+        if not example.is_dir():
+            continue
         session.log(f"Building {example.relative_to(Path('examples'))}")
         with session.chdir(example.resolve()):
             session.run("showyourwork2", "clean", "--deep")

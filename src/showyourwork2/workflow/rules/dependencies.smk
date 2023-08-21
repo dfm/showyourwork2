@@ -4,7 +4,9 @@ from showyourwork2.dependencies import simplify_dependency_tree
 
 SYW__DAG_FLAG = SYW__WORK_PATHS.flag("dag")
 
-def get_document_dependencies(doc):
+def get_document_dependencies(document):
+    doc = document.path
+    dependecies = document.dependencies
     checkpoint_name = utils.rule_name(
         "check", "dependencies", document=doc
     )
@@ -21,13 +23,11 @@ def get_document_dependencies(doc):
 
         # And also any files that are explicitly listed in the document's
         # dependencies in the cofing file.
-        files.extend(SYW__DOCUMENTS[doc])
+        files.extend(dependecies)
 
         # Save the document dependencies to the "config" object for downstream
         # usage.
-        if "_document_dependencies" not in config:
-            config["_document_dependencies"] = {}
-        config["_document_dependencies"][doc] = files
+        config._document_dependencies[doc] = files
 
         return files
     return impl
@@ -38,9 +38,9 @@ def ensure_all_document_dependencies(*_):
     # This checkpoint call serves two purposes: (1) it makes sure that we have
     # extracted the list of all dependencies from the document, and (2) it
     # ensures that the DAG of jobs has been constructed.
-    for doc in SYW__DOCUMENTS:
+    for document in SYW__DOCUMENTS:
         checkpoint_name = utils.rule_name(
-            "check", "dependencies", document=doc
+            "check", "dependencies", document=document.path
         )
         getattr(checkpoints, checkpoint_name).get()
 
@@ -73,14 +73,13 @@ def ensure_all_document_dependencies(*_):
     # Store the dependency tree in the global "config" object. This is also a
     # bit of a hack, but this gives us a nice way to provide downstream rules
     # with access to the computed dependency tree.
-    config["_dependency_tree"] = parents
-    config["_dependency_tree_simple"] = simplify_dependency_tree(
-        parents, SYW__WORK_PATHS.root
-    )
+    config._dependency_tree = parents
+    config._dependency_tree_simple = simplify_dependency_tree(parents, SYW__WORK_PATHS.root)
 
     return []
 
-for doc in SYW__DOCUMENTS:
+for document in SYW__DOCUMENTS:
+    doc = document.path
     name = paths.path_to_rule_name(doc)
     checkpoint:
         name:
@@ -111,6 +110,6 @@ rule:
         SYW__WORK_PATHS.root / "dependency_tree_simple.json"
     run:
         with open(output[0], "w") as f:
-            utils.json_dump(config["_dependency_tree"], f, indent=2)
+            utils.json_dump(config._dependency_tree, f, indent=2)
         with open(output[1], "w") as f:
-            utils.json_dump(config["_dependency_tree_simple"], f, indent=2)
+            utils.json_dump(config._dependency_tree_simple, f, indent=2)

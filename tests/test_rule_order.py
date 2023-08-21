@@ -23,7 +23,7 @@ rule %s__a:
     output: "a.txt"
     shell: "echo syw__a > {output}"
 
-fix_rule_order(config, workflow)
+fix_rule_order(workflow)
 """
                 % prefix
             )
