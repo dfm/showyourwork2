@@ -79,36 +79,9 @@ def _walk_theme_hierarchy(
     config.update(c.get("config", {}))
 
 
-# @lru_cache
-# def _get_built_in_themes() -> Dict[str, Path]:
-#     path = package_data("showyourwork2.plugins.tex", "themes")
-#     themes = list(sorted(path.glob("*")))
-#     return {t.name: t for t in themes}
-
-
-# def _theme_path_from_name(name: str) -> Path:
-#     built_in = _get_built_in_themes()
-#     if name in built_in:
-#         return built_in[name]
-#     return package_data(name)
-
-
 def resolve_theme_path(theme: Union[str, Dict[str, str]]) -> Path:
     if isinstance(theme, str):
         return _theme_path_from_name(theme)
     if "name" in theme:
         return _theme_path_from_name(theme["name"])
     return Path(theme["path"])
-
-
-# def get_theme_for_document(config: Dict[str, Any], document_name: PathLike) -> Theme:
-#     theme = config.get("tex", {}).get("theme", "base")
-
-#     if isinstance(theme, (str, dict)):
-#         return Theme(theme)
-
-#     for entry in theme:
-#         if document_name == entry["document"]:
-#             return Theme(entry["theme"])
-
-#     raise ValueError(f"Could not resolve theme for document '{document_name}'")
