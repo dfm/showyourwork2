@@ -120,7 +120,7 @@ def clean(
         )
         config = load_config(config_file)
         logger = logging.get_logger(config)
-        syw_dir = cwd / paths.work(config).root
+        syw_dir = cwd / paths.work(config.working_directory).root
         if syw_dir.is_dir():
             logger.info(f"Deleting directory {syw_dir}")
             rmtree(syw_dir)

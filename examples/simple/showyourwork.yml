@@ -4,4 +4,4 @@ dynamic:
   - script: generate_figure.py
     output: figure.pdf
 documents:
-  - path: ms.tex
+  - ms.tex
