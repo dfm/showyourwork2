@@ -1,6 +1,6 @@
 import json
-import inspect
-from showyourwork2.dependencies import simplify_dependency_tree
+# import inspect
+# from showyourwork2.dependencies import simplify_dependency_tree
 
 SYW__DAG_FLAG = SYW__WORK_PATHS.flag("dag")
 
@@ -31,51 +31,51 @@ def get_document_dependencies(document):
         return files
     return impl
 
-def ensure_all_document_dependencies(*_):
-    from collections import defaultdict
+# def ensure_all_document_dependencies(*_):
+#     from collections import defaultdict
 
-    # This checkpoint call serves two purposes: (1) it makes sure that we have
-    # extracted the list of all dependencies from the document, and (2) it
-    # ensures that the DAG of jobs has been constructed.
-    for document in SYW__DOCUMENTS:
-        checkpoint_name = utils.rule_name(
-            "check", "dependencies", document=document.path
-        )
-        getattr(checkpoints, checkpoint_name).get()
+#     # This checkpoint call serves two purposes: (1) it makes sure that we have
+#     # extracted the list of all dependencies from the document, and (2) it
+#     # ensures that the DAG of jobs has been constructed.
+#     for document in SYW__DOCUMENTS:
+#         checkpoint_name = utils.rule_name(
+#             "check", "dependencies", document=document.path
+#         )
+#         getattr(checkpoints, checkpoint_name).get()
 
-    # Walk up the call stack to find an object called "dag"... yeah, this is a
-    # hack, but we haven't found a better approach yet!
-    dag = None
-    for level in inspect.stack():
-        dag = level.frame.f_locals.get("dag", None)
-        if dag is not None:
-            break
+#     # Walk up the call stack to find an object called "dag"... yeah, this is a
+#     # hack, but we haven't found a better approach yet!
+#     dag = None
+#     for level in inspect.stack():
+#         dag = level.frame.f_locals.get("dag", None)
+#         if dag is not None:
+#             break
 
-    # If "dag" is still None, then we couldn't find it. We shouldn't ever hit
-    # this (until snakemake renames the variable...), but we have a check just
-    # to be sure.
-    if dag is None:
-        raise RuntimeError(
-            "Could not find DAG object in call stack. This error shouldn't "
-            "ever be hit, but you found it! Please report the issue on the "
-            "showyourwork GitHub page."
-        )
+#     # If "dag" is still None, then we couldn't find it. We shouldn't ever hit
+#     # this (until snakemake renames the variable...), but we have a check just
+#     # to be sure.
+#     if dag is None:
+#         raise RuntimeError(
+#             "Could not find DAG object in call stack. This error shouldn't "
+#             "ever be hit, but you found it! Please report the issue on the "
+#             "showyourwork GitHub page."
+#         )
 
-    # Map the full tree of data dependencies. Here we're collecting the
-    # "parents" for every file that has a rule defined.
-    parents = defaultdict(set)
-    for job in dag.jobs:
-        for output in job.output:
-            parents[output] |= set(str(f) for f in job.input)
-    parents = {k: list(sorted(v)) for k, v in parents.items()}
+#     # Map the full tree of data dependencies. Here we're collecting the
+#     # "parents" for every file that has a rule defined.
+#     parents = defaultdict(set)
+#     for job in dag.jobs:
+#         for output in job.output:
+#             parents[output] |= set(str(f) for f in job.input)
+#     parents = {k: list(sorted(v)) for k, v in parents.items()}
 
-    # Store the dependency tree in the global "config" object. This is also a
-    # bit of a hack, but this gives us a nice way to provide downstream rules
-    # with access to the computed dependency tree.
-    config._dependency_tree = parents
-    config._dependency_tree_simple = simplify_dependency_tree(parents, SYW__WORK_PATHS.root)
+#     # Store the dependency tree in the global "config" object. This is also a
+#     # bit of a hack, but this gives us a nice way to provide downstream rules
+#     # with access to the computed dependency tree.
+#     config._dependency_tree = parents
+#     config._dependency_tree_simple = simplify_dependency_tree(parents, SYW__WORK_PATHS.root)
 
-    return []
+#     return []
 
 flags = []
 for document in SYW__DOCUMENTS:
@@ -113,13 +113,17 @@ rule:
     message:
         "Saving document dependency tree as JSON"
     input:
-        SYW__DAG_FLAG,
-        ensure_all_document_dependencies
+        flags
     output:
         SYW__WORK_PATHS.root / "dependency_tree.json",
         SYW__WORK_PATHS.root / "dependency_tree_simple.json"
     run:
+        from showyourwork2.dependencies import simplify_dependency_tree
+        blob = {str(k): list(sorted(map(str, v))) for k, v in config._dependency_tree.items()}
         with open(output[0], "w") as f:
-            utils.json_dump(config._dependency_tree, f, indent=2)
+            utils.json_dump(blob, f, indent=2)
+
+        simple = simplify_dependency_tree(config._dependency_tree, SYW__WORK_PATHS.root)
+        blob = {str(k): list(sorted(map(str, v))) for k, v in simple.items()}
         with open(output[1], "w") as f:
-            utils.json_dump(config._dependency_tree_simple, f, indent=2)
+            utils.json_dump(blob, f, indent=2)

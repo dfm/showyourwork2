@@ -14,6 +14,12 @@ from showyourwork2.config import parse_config
 config, plugin_manager = parse_config(config)
 del parse_config
 
+# The following monkeypatches the snakemake DAG to trace all job dependencies
+# that are added to it
+from showyourwork2.dag import trace_dag_dependencies
+trace_dag_dependencies(config)
+del trace_dag_dependencies
+
 # Extract some commonly used config values
 SYW__DOCUMENTS = config.documents
 SYW__REPO_PATHS = paths.repo()
