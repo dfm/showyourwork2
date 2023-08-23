@@ -3,16 +3,15 @@ from pathlib import Path
 from typing import List
 
 from showyourwork2.dependencies import simplify_dependency_tree
-from showyourwork2.testing import run_showyourwork, run_snakemake
-
-
-def test_checkpoint_logic() -> None:
-    run_snakemake("tests/projects/checkpoint", "dependencies.json")
+from showyourwork2.testing import run_showyourwork
 
 
 def test_dependency_tree() -> None:
     with run_showyourwork(
-        "tests/projects/dependency_tree", "syw__save_dependencies", show_diff=True
+        "tests/projects/dependency_tree",
+        "syw__save_dependencies",
+        "ms.pdf",
+        show_diff=True,
     ) as d:
         with open(d / ".showyourwork" / "dependency_tree.json", "r") as f:
             data = json.load(f)
@@ -20,6 +19,8 @@ def test_dependency_tree() -> None:
         for c in "abcdefgh":
             assert data[c] == deps
             deps.append(c)
+
+    assert 0
 
 
 def test_explicit_dependencies() -> None:

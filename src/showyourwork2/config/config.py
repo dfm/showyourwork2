@@ -1,17 +1,11 @@
-import sys
 from typing import Any, Dict, List, Tuple
 
 import yaml
 from pydantic import create_model
 
-from showyourwork2.config.models import Config
+from showyourwork2.config.models import Config, expect_at_least_one_document
 from showyourwork2.paths import PathLike
 from showyourwork2.plugins import PluginManager
-
-if sys.version_info >= (3, 11):
-    import tomllib  # noqa
-else:
-    import tomli as tomllib  # noqa
 
 
 def load_config(file: PathLike) -> Config:
@@ -59,6 +53,7 @@ def parse_config(config: Dict[str, Any]) -> Tuple[Config, PluginManager]:
         "Config",
         __base__=tuple(plugin_manager.hook.config_model()),
         documents=(List[Document], []),  # type: ignore
+        __validators__={"expect_at_least_one_document": expect_at_least_one_document},
     )
 
     return Config.model_validate(config), plugin_manager

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Set, Type
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
@@ -65,7 +65,7 @@ class Config(BaseModel):
     snakefiles: List[Path] = []
 
     _document_dependencies: Dict[Path, List[Path]] = {}
-    _dependency_tree: Dict[Path, List[Path]] = {}
+    _dependency_tree: Dict[Path, Set[Path]] = {}
     _dependency_tree_simple: Dict[Path, List[Path]] = {}
 
     model_config = ConfigDict(extra="forbid")
@@ -81,11 +81,12 @@ class Config(BaseModel):
             )
         return config_version
 
-    @model_validator(mode="after")
-    def expect_at_least_one_document(self) -> "Config":
-        if not self.documents:
-            raise ValueError("No documents were specified in the configuration file")
-        return self
+
+@model_validator(mode="after")
+def expect_at_least_one_document(self: Config) -> Config:
+    if not self.documents:
+        raise ValueError("No documents were specified in the configuration file")
+    return self
 
 
 @hookimpl

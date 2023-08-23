@@ -5,14 +5,12 @@ from showyourwork2.dependencies import simplify_dependency_tree
 SYW__DAG_FLAG = SYW__WORK_PATHS.flag("dag")
 
 def get_document_dependencies(document):
-    doc = document.path
-    dependecies = document.dependencies
-    checkpoint_name = utils.rule_name(
-        "check", "dependencies", document=doc
-    )
-
     def impl(*_):
-        getattr(checkpoints, checkpoint_name).get()
+        doc = document.path
+        explicit_deps = document.dependencies
+        getattr(checkpoints, utils.rule_name(
+            "check", "dependencies", document=doc
+        )).get()
 
         # Include the dependencies extracted from the document.
         with open(SYW__WORK_PATHS.dependencies_for(doc), "r") as f:
@@ -20,14 +18,15 @@ def get_document_dependencies(document):
         files = list(dependencies.get("unlabeled", [])) + list(dependencies.get("files", []))
         for figure in dependencies.get("figures", {}).values():
             files.extend(figure)
+        files = [Path(f) for f in files]
 
         # And also any files that are explicitly listed in the document's
         # dependencies in the cofing file.
-        files.extend(dependecies)
+        files.extend(explicit_deps)
 
         # Save the document dependencies to the "config" object for downstream
         # usage.
-        config._document_dependencies[doc] = files
+        config._document_dependencies[doc] = list(sorted(set(files)))
 
         return files
     return impl
@@ -78,22 +77,33 @@ def ensure_all_document_dependencies(*_):
 
     return []
 
+flags = []
 for document in SYW__DOCUMENTS:
     doc = document.path
     name = paths.path_to_rule_name(doc)
+    flag = SYW__WORK_PATHS.flag(f"dependencies_{name}")
+    flags.append(flag)
     checkpoint:
         name:
             utils.rule_name("check", "dependencies", document=doc)
         input:
             SYW__WORK_PATHS.dependencies_for(doc)
         output:
-            touch(SYW__WORK_PATHS.flag(f"dependencies_{name}"))
+            touch(SYW__WORK_PATHS.flag(f"dependencies_checkpoint_{name}"))
+
+    rule:
+        name:
+            utils.rule_name("get", "dependencies", document=doc)
+        input:
+            get_document_dependencies(document)
+        output:
+            touch(flag)
 
 rule:
     name:
         utils.rule_name("dag")
     input:
-        [get_document_dependencies(doc) for doc in SYW__DOCUMENTS]
+        flags
     output:
         touch(SYW__DAG_FLAG)
 
