@@ -4,7 +4,7 @@ from typing import Callable
 
 import nox
 
-OLDEST_SUPPORTED_SNAKEMAKE = "7.15.2"
+OLDEST_SUPPORTED_SNAKEMAKE = "7.16"
 
 
 def snakemake_session(
