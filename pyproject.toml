@@ -16,13 +16,11 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-    "snakemake>=7.15.2",                     # TODO(dfm): figure out what minimum version we _actually_ need
+    "snakemake>=7.16",
     "requests",
-    "tomli>=1.1.0; python_version < '3.11'",
     "pydantic",
     "pluggy",
     "pyyaml",
-    "jsonschema",
     "click",
     "ensureconda",
     "Jinja2",

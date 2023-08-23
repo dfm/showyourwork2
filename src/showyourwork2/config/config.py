@@ -1,4 +1,3 @@
-import sys
 from typing import Any, Dict, List, Tuple
 
 import yaml
@@ -7,11 +6,6 @@ from pydantic import create_model
 from showyourwork2.config.models import Config
 from showyourwork2.paths import PathLike
 from showyourwork2.plugins import PluginManager
-
-if sys.version_info >= (3, 11):
-    import tomllib  # noqa
-else:
-    import tomli as tomllib  # noqa
 
 
 def load_config(file: PathLike) -> Config:
