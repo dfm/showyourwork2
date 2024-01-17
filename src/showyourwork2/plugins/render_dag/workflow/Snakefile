@@ -1,0 +1,3 @@
+from showyourwork2.paths import package_data
+
+include: package_data("showyourwork2.plugins.render_dag", "workflow", "rules", "render.smk")
