@@ -65,7 +65,7 @@ jobs:
 
       - name: "Cache: save environments"
         if: startsWith(matrix.nox-session, 'tests')
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .test/conda
           key: ${{ runner.os }}-${{ hashFiles('.nox-session-name') }}-conda-${{ hashFiles('**/environment.yml', '**/envs/*.yml', 'src/showyourwork2/testing.py') }}
